@@ -8,21 +8,25 @@ const theme = createTheme({
         ].join(','),
     },
     components: {
-        MuiCssBaseline: {
-            styleOverrides: `
-                @font-face {
-                    font-family: 'Geist Sans';
-                    font-display: swap;
-        }
-            `,
-        },
-    },
+  MuiCssBaseline: {
+    styleOverrides: `
+      @font-face {
+        font-family: 'Geist Sans';
+        src: url('/fonts/GeistSans.woff2') format('woff2');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+    `,
+  },
+},
     palette: {
     primary: {
       main: '#0070f3', 
       light: '#3291ff',
-      dark: '#0025d2',
+      dark: '#0d2280',
       contrastText: '#fff', 
+      grey: '#888888',
     },
     secondary: {
       main: '#ff0080',

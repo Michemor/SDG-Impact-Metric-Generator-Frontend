@@ -1,9 +1,5 @@
 import MenuIcon from '@mui/icons-material/Menu';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import IconButton from '@mui/material/IconButton';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
+import { AppBar, Box, IconButton, Toolbar, Typography, Stack } from "@mui/material";
 
 
 export default function TopNavigation({ onMenuClick }) {
@@ -30,9 +26,15 @@ export default function TopNavigation({ onMenuClick }) {
                     >
                         <MenuIcon />
                     </IconButton>
-                    <Typography color="#000000ff" variant="h5" component="div" sx={{ flexGrow: 1 }}>
-                        SDG Impact Dashboard
-                    </Typography>
+                    <Stack>
+                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                        Daystar University
+                    </Typography> 
+                    <Typography color="grey.500" variant='body2'sx={{
+                        flexGrow: 1,
+                        fontSize: '0.875rem',
+                    }}> SDG Impact Dashboard</Typography>
+                    </Stack>
                 </Toolbar>
             </AppBar>
         </Box>
