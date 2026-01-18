@@ -2,6 +2,8 @@ import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
 import ReportsPage from './pages/ReportsPage'
 import AddEntryPage from './pages/AddEntryPage'
 
+// Defines the main application component for the SDG Impact Dashboard
+
 function App() {
 	return (
 		<BrowserRouter>
