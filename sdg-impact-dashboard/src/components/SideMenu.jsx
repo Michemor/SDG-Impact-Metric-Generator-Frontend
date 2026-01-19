@@ -75,12 +75,12 @@ export default function SideMenu({ open, onClose }) {
                         },
                     ...(isSelected && {
                         backgroundColor: 'primary.dark',
-                        color: 'white',
+                        color: 'primary.dark',
                         '&:hover': {
                             backgroundColor: 'primary.dark',
                         },
                         '& .MuiListItemIcon-root, & .MuiTypography-root': {
-                            color: 'white',
+                            color: 'primary.dark',
                         },
                     }),
                 }}>
