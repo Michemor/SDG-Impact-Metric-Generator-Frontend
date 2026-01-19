@@ -5,8 +5,8 @@ import MapIcon from '@mui/icons-material/Map';
 import CompareIcon from '@mui/icons-material/Compare';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import List from "@mui/material/List";
-import Divider from "@mui/material/Divider"
-import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 import { useTheme } from "@mui/material/styles";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -21,9 +21,9 @@ export default function SideMenu({ open, onClose }) {
     const menuItems = [
         { text: 'Dashboard', icon: <DashboardIcon />, path: '/'},
         { text: 'Projects and Initiatives', icon: <WorkIcon />, path: '/projects' },
-        { text: 'Impact Map', icon: <MapIcon />, path: '/impact-map' },
         { text: 'Benchmark', icon: <CompareIcon />,path: '/benchmark' },
-        { text: 'Reports', icon: <AssessmentIcon />, path: '/reports' },
+        { text: 'Reports', icon: <ReceiptIcon />, path: '/reports' },
+        {text: 'Add Entry', icon: <AddCircleOutlineOutlinedIcon />, path: '/add-entry' },
     ];
 
     return (
