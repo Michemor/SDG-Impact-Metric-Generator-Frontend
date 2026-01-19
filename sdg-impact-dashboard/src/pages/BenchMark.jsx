@@ -1,14 +1,21 @@
-import { Paper, Typography } from "@mui/material"
+import { Card, CardHeader, Paper, Typography, CardContent } from "@mui/material"
+import { BarChart } from "@mui/x-charts"
+import institutionalData from "../data/unis.json"
 
 export default function Benchmark() {
+    const universities = institutionalData.institutionalData;
+    
+    const colors = [
+        '#1976d2', '#dc004e', '#4caf50', '#ff9800', '#9c27b0',
+        '#00bcd4', '#795548', '#607d8b', '#e91e63', '#3f51b5'
+    ];
 
-    const institutionalData =[
-        { university: "Daystar University", impactScore: 85, sdgCoverage: 12 },
-        { university: "MelWater University", impactScore: 78, sdgCoverage: 10 },
-        { university: "ValleyBridge University", impactScore: 90, sdgCoverage: 14 },
-        { university: "ModernWake University", impactScore: 65, sdgCoverage: 8 },
-        { university: "GreenField University", impactScore: 82, sdgCoverage: 11 },
-    ]
+    const series = universities.map((uni, index) => ({
+        data: [uni.impactScore],
+        label: uni.university,
+        color: colors[index % colors.length],
+    }));
+
     return (
         <>
         <Paper
@@ -20,8 +27,33 @@ export default function Benchmark() {
                     BenchMark
             </Typography>
             <Typography variant="body1">
-                A display of benchmark data and analytics of daystar University against other universities in various SDG initiatives.
+                A display of benchmark data and analytics of daystar University against other 
+                universities in various SDG initiatives.
             </Typography>
+
+            <BarChart
+                height={400}
+                width={800}
+                series={series}
+                xAxis={[
+                    {
+                        scaleType: 'band',
+                        data: ['Impact Score'],
+                    },
+                ]}
+                yAxis={[
+                    {
+                        label: 'Impact Score',
+                    },
+                ]}
+                slotProps={{
+                    legend: {
+                        direction: 'row',
+                        position: { vertical: 'bottom', horizontal: 'middle' },
+                        padding: 0,
+                    },
+                }}
+            />
             
         </Paper>
         </>
