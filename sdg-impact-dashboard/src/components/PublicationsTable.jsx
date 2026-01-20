@@ -1,26 +1,16 @@
-import React from 'react';
-import { useTheme } from '@mui/material/styles';
-import { Box, Chip, LinearProgress, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
-import { publicationsData } from '../data/mockData';
+import { publicationsData } from '../data/mockData'
 
-function statusColor(status, theme) {
-  switch (status) {
-    case 'Published':
-      return theme.palette.primary.main;
-    case 'In Review':
-      return theme.palette.warning.main;
-    case 'Draft':
-      return theme.palette.grey[600];
-    default:
-      return theme.palette.grey[500];
-  }
+const statusColors = {
+  Published: 'bg-green-500',
+  'In Review': 'bg-amber-500',
+  Draft: 'bg-gray-500',
 }
 
 export default function PublicationsTable({ filterText = '' }) {
-  const theme = useTheme();
-  const query = filterText.trim().toLowerCase();
+  const query = filterText.trim().toLowerCase()
+  
   const rows = publicationsData.filter((row) => {
-    if (!query) return true;
+    if (!query) return true
     const haystack = [
       row.project,
       row.type,
@@ -30,64 +20,72 @@ export default function PublicationsTable({ filterText = '' }) {
       (row.sdgs || []).join(',')
     ]
       .map((v) => String(v).toLowerCase())
-      .join(' ');
-    return haystack.includes(query);
-  });
+      .join(' ')
+    return haystack.includes(query)
+  })
 
   return (
-    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
-      <Table size="small" aria-label="publications table" sx={{ minWidth: 750 }}>
-        <TableHead>
-          <TableRow sx={{ backgroundColor: theme.palette.action.hover }}>
-            <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>Project</TableCell>
-            <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>Type</TableCell>
-            <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>Status</TableCell>
-            <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>SDGs</TableCell>
-            <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>Date</TableCell>
-            <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>Department</TableCell>
-            <TableCell sx={{ fontWeight: 600, color: 'text.primary' }} align="right">Impact</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
+    <div className="overflow-x-auto border border-gray-200 rounded-lg">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Title</th>
+            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Type</th>
+            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">SDGs</th>
+            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
+            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Department</th>
+            <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">Impact</th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
           {rows.map((row) => (
-            <TableRow key={row.id} hover>
-              <TableCell sx={{ color: 'text.primary', fontWeight: 500 }}>{row.project}</TableCell>
-              <TableCell sx={{ color: 'text.primary' }}>{row.type}</TableCell>
-              <TableCell>
-                <Chip label={row.status} sx={{ color: '#fff', backgroundColor: statusColor(row.status, theme), height: 24 }} size="small" />
-              </TableCell>
-              <TableCell>
-                <Stack direction="row" spacing={0.5} sx={{ flexWrap: 'wrap' }}>
-                  {row.sdgs.map((n) => (
-                    <Box key={n} sx={{ backgroundColor: '#e3f2fd', color: 'text.primary', borderRadius: 1, px: 1, py: 0.3, fontSize: '0.75rem', fontWeight: 600 }}>
-                      {n}
-                    </Box>
+            <tr key={row.id} className="hover:bg-gray-50 transition-colors">
+              <td className="px-4 py-3 text-sm font-medium text-gray-900">{row.project}</td>
+              <td className="px-4 py-3 text-sm text-gray-600">{row.type}</td>
+              <td className="px-4 py-3">
+                <span
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${
+                    statusColors[row.status] || 'bg-gray-500'
+                  }`}
+                >
+                  {row.status}
+                </span>
+              </td>
+              <td className="px-4 py-3">
+                <div className="flex flex-wrap gap-1">
+                  {row.sdgs.map((sdg) => (
+                    <span
+                      key={sdg}
+                      className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-purple-100 text-purple-800"
+                    >
+                      {sdg}
+                    </span>
                   ))}
-                </Stack>
-              </TableCell>
-              <TableCell sx={{ color: 'text.primary' }}>{row.date}</TableCell>
-              <TableCell sx={{ color: 'text.primary' }}>{row.department}</TableCell>
-              <TableCell align="right" sx={{ width: 200 }}>
-                <Stack spacing={0.5} alignItems="flex-end">
-                  <Typography sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>{row.impact}%</Typography>
-                  <LinearProgress
-                    variant="determinate"
-                    value={row.impact}
-                    sx={{
-                      width: '100%',
-                      height: 8,
-                      borderRadius: 4,
-                      '& .MuiLinearProgress-bar': {
-                        background: `linear-gradient(90deg, ${theme.palette.primary.light}, ${theme.palette.primary.main})`,
-                      },
-                    }}
-                  />
-                </Stack>
-              </TableCell>
-            </TableRow>
+                </div>
+              </td>
+              <td className="px-4 py-3 text-sm text-gray-600">{row.date}</td>
+              <td className="px-4 py-3 text-sm text-gray-600">{row.department}</td>
+              <td className="px-4 py-3 text-right">
+                <div className="flex flex-col items-end gap-1">
+                  <span className="text-xs text-gray-500">{row.impact}%</span>
+                  <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-purple-400 to-purple-600 rounded-full transition-all duration-300"
+                      style={{ width: `${row.impact}%` }}
+                    />
+                  </div>
+                </div>
+              </td>
+            </tr>
           ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  );
+        </tbody>
+      </table>
+      {rows.length === 0 && (
+        <div className="text-center py-8 text-gray-500">
+          No publications found matching your search.
+        </div>
+      )}
+    </div>
+  )
 }

@@ -1,45 +1,21 @@
-import MenuIcon from '@mui/icons-material/Menu';
-import { AppBar, Box, IconButton, Toolbar, Typography, Stack } from "@mui/material";
-
+import { Menu } from 'lucide-react'
 
 export default function TopNavigation({ onMenuClick }) {
-    return (
-        <Box 
-        height="64px" 
-        sx={(theme) => ({
-            zIndex: theme.zIndex.drawer + 1,
-        })}>
-            <AppBar position='sticky' color='transparent' elevation={0}
-            sx={{
-                backgroundColor: '#ffffff',
-                backdropFilter: 'blur(10px)',
-                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                borderBottom: '2px solid #e0e0e0',
-            }}>
-                <Toolbar>
-                    <IconButton
-                        size="large"
-                        edge="start"
-                        color="inherit"
-                        aria-label="menu"
-                        sx={{ 
-                            width: 48, 
-                            height: 48,}}
-                        onClick={onMenuClick}
-                    >
-                        <MenuIcon />
-                    </IconButton>
-                    <Stack>
-                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                        Daystar University
-                    </Typography> 
-                    <Typography color="grey.500" variant='body2'sx={{
-                        flexGrow: 1,
-                        fontSize: '0.875rem',
-                    }}> SDG Impact Dashboard</Typography>
-                    </Stack>
-                </Toolbar>
-            </AppBar>
-        </Box>
-    )
+  return (
+    <header className="h-16 bg-white border-b-2 border-gray-200 shadow-sm sticky top-0 z-50 backdrop-blur-md">
+      <div className="flex items-center h-full px-4">
+        <button
+          onClick={onMenuClick}
+          className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+          aria-label="Toggle menu"
+        >
+          <Menu className="w-6 h-6 text-gray-700" />
+        </button>
+        <div className="ml-4">
+          <h1 className="text-lg font-semibold text-gray-800">Daystar University</h1>
+          <p className="text-sm text-gray-500">SDG Impact Dashboard</p>
+        </div>
+      </div>
+    </header>
+  )
 }

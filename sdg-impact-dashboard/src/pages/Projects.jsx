@@ -1,96 +1,96 @@
-import { Box, Paper, Typography, Divider, Tab, Tabs, TextField, InputAdornment } from "@mui/material"
-import ProjectsTable from "../components/ProjectsTable";
-import PublicationsTable from "../components/PublicationsTable";
-import { useState } from "react";
-import SearchIcon from '@mui/icons-material/Search';
+import { useState } from 'react'
+import { Search } from 'lucide-react'
+import ProjectsTable from '../components/ProjectsTable'
+import PublicationsTable from '../components/PublicationsTable'
 
 export default function Projects() {
-    const [tabValue, setTabValue] = useState(0); // 0 for Projects, 1 for Publications
-    const [projectQuery, setProjectQuery] = useState("");
-    const [publicationQuery, setPublicationQuery] = useState("");
-    const handleTabChange = (event, newValue) => {
-        // Handle tab change logic here
-        setTabValue(newValue);
-    }
-    return (
-        <>
-        <Paper
-        sx={{ 
-            padding: 3, 
-            margin: 'auto',
-            mt: 2
-        }}
-        position="absolute">
-            <Typography variant="h4" component="h1" gutterBottom>
-                Projects and Publications
-            </Typography>
-            <Divider sx={{ my: 2 }} />
-            <Box sx={{ 
-                p: 2,
-                borderRadius: 2,
-                backgroundColor: 'background.paper',
-                boxShadow: 1
+  const [tabValue, setTabValue] = useState(0)
+  const [projectQuery, setProjectQuery] = useState('')
+  const [publicationQuery, setPublicationQuery] = useState('')
 
-                 }}>
-                    <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1 }}>
-                       View and manage all projects and publications related to your SDG initiatives. Use the tabs below to switch between project and publication views.
-                    </Typography>
+  return (
+    <div className="p-6">
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <h1 className="text-2xl font-bold text-gray-800 mb-2">
+          Projects and Publications
+        </h1>
+        <hr className="my-4 border-gray-200" />
 
-                    {/** Creating a stepper */}
-                    <Box justifyContent="center" sx={{ width: '100%' }}>
-                        <Tabs value={tabValue} onChange={handleTabChange} sx={{ mt: 3 }}>
-                            <Tab label="Projects" />
-                            <Tab label="Publications" />
-                        </Tabs>
-                    </Box>
-                    <Divider sx={{ my: 2 }} />
+        <div className="bg-gray-50 rounded-lg p-4">
+          <p className="text-gray-600 text-sm mb-4">
+            View and manage all projects and publications related to your SDG initiatives. 
+            Use the tabs below to switch between project and publication views.
+          </p>
 
-                    <Box value={0} hidden={tabValue !== 0}>
-                            <Typography variant="h6" sx={{ color: 'text.primary', mb: 1 }}>
-                                Projects
-                            </Typography>
-                            <TextField
-                                fullWidth
-                                placeholder="Search projects by name, type, status, department, SDGs or date"
-                                value={projectQuery}
-                                onChange={(e) => setProjectQuery(e.target.value)}
-                                size="small"
-                                sx={{ mb: 2 }}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <SearchIcon sx={{ color: 'text.secondary' }} />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
-                            <ProjectsTable filterText={projectQuery} />
-                        </Box>
+          {/* Tabs */}
+          <div className="flex border-b border-gray-200 mb-4">
+            <button
+              onClick={() => setTabValue(0)}
+              className={`px-6 py-3 text-sm font-medium transition-colors relative ${
+                tabValue === 0
+                  ? 'text-blue-600'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Projects
+              {tabValue === 0 && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+              )}
+            </button>
+            <button
+              onClick={() => setTabValue(1)}
+              className={`px-6 py-3 text-sm font-medium transition-colors relative ${
+                tabValue === 1
+                  ? 'text-blue-600'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Publications
+              {tabValue === 1 && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+              )}
+            </button>
+          </div>
 
-                        <Box sx={{ mt: 4 }} value={1} hidden={tabValue !== 1}>
-                            <Typography variant="h6" sx={{ color: 'text.primary', my: 1 }}>
-                                Publications
-                            </Typography>
-                            <TextField
-                                fullWidth
-                                placeholder="Search publications by title, type, status, department, SDGs or date"
-                                value={publicationQuery}
-                                onChange={(e) => setPublicationQuery(e.target.value)}
-                                size="small"
-                                sx={{ mb: 2 }}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <SearchIcon sx={{ color: 'text.secondary' }} />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
-                            <PublicationsTable filterText={publicationQuery} />
-                        </Box>
-                    </Box>
+          <hr className="my-4 border-gray-200" />
 
-        </Paper>
-        </>
-    )
+          {/* Projects Tab */}
+          {tabValue === 0 && (
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800 mb-3">Projects</h2>
+              <div className="relative mb-4">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search projects by name, type, status, department, SDGs or date"
+                  value={projectQuery}
+                  onChange={(e) => setProjectQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                />
+              </div>
+              <ProjectsTable filterText={projectQuery} />
+            </div>
+          )}
+
+          {/* Publications Tab */}
+          {tabValue === 1 && (
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800 mb-3">Publications</h2>
+              <div className="relative mb-4">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search publications by title, type, status, department, SDGs or date"
+                  value={publicationQuery}
+                  onChange={(e) => setPublicationQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                />
+              </div>
+              <PublicationsTable filterText={publicationQuery} />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
 }

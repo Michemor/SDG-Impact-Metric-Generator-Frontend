@@ -1,23 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  FormControl,
-  FormHelperText,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  Stack,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-  Typography,
-  Divider,
-} from '@mui/material'
+import { AlertCircle, CheckCircle } from 'lucide-react'
 import { createRecord, fetchMetadata } from '../services/apiClient'
 
 const currentYear = new Date().getFullYear()
@@ -32,7 +14,7 @@ const initialFormState = {
   year: currentYear,
 }
 
-const AddEntryPage = () => {
+export default function AddEntryPage() {
   const [form, setForm] = useState(initialFormState)
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState('idle')
@@ -56,7 +38,10 @@ const AddEntryPage = () => {
     loadMetadata()
   }, [])
 
-  const sdgLookup = useMemo(() => new Map(metadata.sdgs.map((sdg) => [sdg.id, sdg])), [metadata.sdgs])
+  const sdgLookup = useMemo(
+    () => new Map(metadata.sdgs.map((sdg) => [sdg.id, sdg])),
+    [metadata.sdgs]
+  )
 
   const handleInputChange = (event) => {
     const { name, value } = event.target
@@ -139,182 +124,217 @@ const AddEntryPage = () => {
   const selectedSdgs = form.sdgIds.map((id) => sdgLookup.get(Number(id))).filter(Boolean)
 
   return (
-    <Paper sx={{ 
-      p: 3,
-      m: 3,
-       }}>
-      <Typography variant="h4" sx={{
-        color: (theme) => theme.palette.primary.main,
-      }}fontWeight="bold" gutterBottom>
-        Add Project or Publication
-      </Typography>
-      <Divider sx={{ mb: 2 }} />
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Capture new scholarship outputs and automatically link them to SDGs, departments, and researchers. Validations
-        run on both the client and the API to protect data quality.
-      </Typography>
+    <div className="p-6">
+      <div className="bg-white rounded-xl shadow-sm p-6 max-w-4xl mx-auto">
+        <h1 className="text-2xl font-bold text-blue-600 mb-2">
+          Add Project or Publication
+        </h1>
+        <hr className="my-4 border-gray-200" />
+        <p className="text-gray-600 text-sm mb-6">
+          Capture new scholarship outputs and automatically link them to SDGs, departments, and researchers. 
+          Validations run on both the client and the API to protect data quality.
+        </p>
 
-      {serverMessage && (
-        <Alert severity={status === 'success' ? 'success' : 'error'} sx={{ mb: 2 }}>
-          {serverMessage}
-        </Alert>
-      )}
+        {/* Status Messages */}
+        {serverMessage && (
+          <div
+            className={`flex items-center gap-3 p-4 rounded-lg mb-6 ${
+              status === 'success'
+                ? 'bg-green-50 border border-green-200'
+                : 'bg-red-50 border border-red-200'
+            }`}
+          >
+            {status === 'success' ? (
+              <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+            ) : (
+              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+            )}
+            <p className={status === 'success' ? 'text-green-700' : 'text-red-700'}>
+              {serverMessage}
+            </p>
+          </div>
+        )}
 
-      {loadingMetadata ? (
-        <Typography color="text.secondary">Loading metadata (SDGs, departments, researchers)...</Typography>
-      ) : (
-        <Box component="form" onSubmit={handleSubmit}>
-          <Stack spacing={3}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  required
+        {loadingMetadata ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span className="ml-3 text-gray-600">Loading metadata (SDGs, departments, researchers)...</span>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Title, Type, Year Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="sm:col-span-2">
+                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                  Title <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
                   id="title"
                   name="title"
-                  label="Title"
                   value={form.title}
                   onChange={handleInputChange}
-                  error={Boolean(errors.title)}
-                  helperText={errors.title}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${
+                    errors.title ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 />
-              </Grid>
+                {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
+              </div>
 
-              <Grid item xs={12} sm={3}>
-                <FormControl fullWidth required error={Boolean(errors.type)}>
-                  <InputLabel id="type-label">Type</InputLabel>
-                  <Select
-                    labelId="type-label"
-                    id="type"
-                    name="type"
-                    value={form.type}
-                    label="Type"
-                    onChange={handleInputChange}
-                  >
-                    <MenuItem value="project">Project</MenuItem>
-                    <MenuItem value="publication">Publication</MenuItem>
-                  </Select>
-                  {errors.type && <FormHelperText>{errors.type}</FormHelperText>}
-                </FormControl>
-              </Grid>
+              <div>
+                <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
+                  Type <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="type"
+                  name="type"
+                  value={form.type}
+                  onChange={handleInputChange}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${
+                    errors.type ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                >
+                  <option value="project">Project</option>
+                  <option value="publication">Publication</option>
+                </select>
+                {errors.type && <p className="mt-1 text-sm text-red-600">{errors.type}</p>}
+              </div>
 
-              <Grid item xs={12} sm={3}>
-                <TextField
-                  fullWidth
-                  required
+              <div>
+                <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-1">
+                  Year <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
                   id="year"
                   name="year"
-                  label="Year"
-                  type="number"
-                  inputProps={{ min: 1970, max: currentYear + 1 }}
+                  min={1970}
+                  max={currentYear + 1}
                   value={form.year}
                   onChange={handleInputChange}
-                  error={Boolean(errors.year)}
-                  helperText={errors.year}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${
+                    errors.year ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 />
-              </Grid>
+                {errors.year && <p className="mt-1 text-sm text-red-600">{errors.year}</p>}
+              </div>
+            </div>
 
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth required error={Boolean(errors.departmentId)}>
-                  <InputLabel id="department-label">Department</InputLabel>
-                  <Select
-                    labelId="department-label"
-                    id="departmentId"
-                    name="departmentId"
-                    value={form.departmentId}
-                    label="Department"
-                    onChange={handleInputChange}
-                  >
-                    <MenuItem value="">
-                      <em>Select department</em>
-                    </MenuItem>
-                    {metadata.departments.map((department) => (
-                      <MenuItem key={department.id} value={department.id}>
-                        {department.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  {errors.departmentId && <FormHelperText>{errors.departmentId}</FormHelperText>}
-                </FormControl>
-              </Grid>
-            </Grid>
+            {/* Department */}
+            <div className="sm:w-1/2">
+              <label htmlFor="departmentId" className="block text-sm font-medium text-gray-700 mb-1">
+                Department <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="departmentId"
+                name="departmentId"
+                value={form.departmentId}
+                onChange={handleInputChange}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${
+                  errors.departmentId ? 'border-red-500' : 'border-gray-300'
+                }`}
+              >
+                <option value="">Select department</option>
+                {metadata.departments.map((department) => (
+                  <option key={department.id} value={department.id}>
+                    {department.name}
+                  </option>
+                ))}
+              </select>
+              {errors.departmentId && <p className="mt-1 text-sm text-red-600">{errors.departmentId}</p>}
+            </div>
 
-            <TextField
-              fullWidth
-              required
-              multiline
-              minRows={3}
-              id="description"
-              name="description"
-              label="Description / Abstract"
-              value={form.description}
-              onChange={handleInputChange}
-              error={Boolean(errors.description)}
-              helperText={errors.description}
-            />
+            {/* Description */}
+            <div>
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                Description / Abstract <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                id="description"
+                name="description"
+                rows={4}
+                value={form.description}
+                onChange={handleInputChange}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none ${
+                  errors.description ? 'border-red-500' : 'border-gray-300'
+                }`}
+              />
+              {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description}</p>}
+            </div>
 
-            <Box>
-              <Typography variant="subtitle2" gutterBottom>
-                SDG(s) <span style={{ color: '#d32f2f' }}>*</span>
-              </Typography>
-              <ToggleButtonGroup value={form.sdgIds} sx={{ flexWrap: 'wrap', gap: 0.5 }}>
+            {/* SDGs */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                SDG(s) <span className="text-red-500">*</span>
+              </label>
+              <div className="flex flex-wrap gap-2">
                 {metadata.sdgs.map((sdg) => (
-                  <ToggleButton
+                  <button
                     key={sdg.id}
-                    value={Number(sdg.id)}
-                    selected={form.sdgIds.includes(Number(sdg.id))}
+                    type="button"
                     onClick={() => toggleSelection('sdgIds', sdg.id)}
-                    size="small"
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
+                      form.sdgIds.includes(Number(sdg.id))
+                        ? 'bg-blue-600 text-white border-blue-600'
+                        : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'
+                    }`}
                   >
                     {sdg.code}
-                  </ToggleButton>
+                  </button>
                 ))}
-              </ToggleButtonGroup>
-              {errors.sdgIds && (
-                <FormHelperText error sx={{ mt: 0.5 }}>
-                  {errors.sdgIds}
-                </FormHelperText>
-              )}
+              </div>
+              {errors.sdgIds && <p className="mt-1 text-sm text-red-600">{errors.sdgIds}</p>}
               {selectedSdgs.length > 0 && (
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                <p className="mt-2 text-sm text-gray-600">
                   Selected: {selectedSdgs.map((sdg) => sdg.title).join(', ')}
-                </Typography>
+                </p>
               )}
-            </Box>
+            </div>
 
-            <Box>
-              <Typography variant="subtitle2" gutterBottom>
-                Researchers / Authors <span style={{ color: '#d32f2f' }}>*</span>
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+            {/* Researchers */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Researchers / Authors <span className="text-red-500">*</span>
+              </label>
+              <div className="flex flex-wrap gap-2">
                 {metadata.researchers.map((person) => (
-                  <Chip
+                  <button
                     key={person.id}
-                    label={person.name}
-                    clickable
-                    color={form.researcherIds.includes(person.id) ? 'primary' : 'default'}
-                    variant={form.researcherIds.includes(person.id) ? 'filled' : 'outlined'}
+                    type="button"
                     onClick={() => toggleStringSelection('researcherIds', person.id)}
-                  />
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                      form.researcherIds.includes(person.id)
+                        ? 'bg-purple-600 text-white border-purple-600'
+                        : 'bg-white text-gray-700 border-gray-300 hover:border-purple-400'
+                    }`}
+                  >
+                    {person.name}
+                  </button>
                 ))}
-              </Box>
-              {errors.researcherIds && (
-                <FormHelperText error sx={{ mt: 0.5 }}>
-                  {errors.researcherIds}
-                </FormHelperText>
-              )}
-            </Box>
+              </div>
+              {errors.researcherIds && <p className="mt-1 text-sm text-red-600">{errors.researcherIds}</p>}
+            </div>
 
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <Button type="submit" variant="contained" disabled={status === 'submitting'}>
-                {status === 'submitting' ? 'Saving...' : 'Save Entry'}
-              </Button>
-            </Box>
-          </Stack>
-        </Box>
-      )}
-    </Paper>
+            {/* Submit Button */}
+            <div className="pt-4">
+              <button
+                type="submit"
+                disabled={status === 'submitting'}
+                className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                {status === 'submitting' ? (
+                  <span className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Saving...
+                  </span>
+                ) : (
+                  'Save Entry'
+                )}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
   )
 }
-
-export default AddEntryPage
