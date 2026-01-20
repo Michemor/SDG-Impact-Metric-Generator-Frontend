@@ -13,7 +13,14 @@ export default function Dashboard() {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
     return (
-        <Container color="white" maxWidth={false} disableGutters={true}>
+        <Container 
+            maxWidth={false} 
+            disableGutters={true}
+            sx={{
+                background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 50%, #90caf9 100%)',
+                minHeight: '100vh',
+            }}
+        >
             <SideMenu open={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
             <Box
             sx={(theme) => ({

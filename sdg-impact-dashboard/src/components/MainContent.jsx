@@ -3,8 +3,6 @@ import RecentProjectsTable from "./RecentProjectsTable";
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import ArticleIcon from '@mui/icons-material/Article';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import AdjustIcon from '@mui/icons-material/Adjust';
 import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
 import { LineChart } from "@mui/x-charts";
 

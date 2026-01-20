@@ -1,46 +1,31 @@
 import { createTheme } from "@mui/material";
 
+export const sdgPalette = {
+  g1: '#E5243B', g2: '#DDA63A', g3: '#4C9F38', g4: '#C5192D',
+  g5: '#FF3A21', g6: '#26BDE2', g7: '#FCC30B', g8: '#A21942',
+  g9: '#FD6925', g10: '#DD1367', g11: '#FD9D24', g12: '#BF8B2E',
+  g13: '#3F7E44', g14: '#0A97D9', g15: '#56C02B', g16: '#00689D',
+  g17: '#19486A',
+};
+
 const theme = createTheme({
-    typography: {
-        fontFamily: [
-            'Geist Sans',
-            'sans-serif'
-        ].join(','),
-    },
-    components: {
-  MuiCssBaseline: {
-    styleOverrides: `
-      @font-face {
-        font-family: 'Geist Sans';
-        src: url('/fonts/GeistSans.woff2') format('woff2');
-        font-weight: 400;
-        font-style: normal;
-        font-display: swap;
-      }
-    `,
-  },
-},
-    palette: {
+  palette: {
     primary: {
-      main: '#0070f3', 
-      light: '#3291ff',
-      dark: '#0d2280',
-      contrastText: '#fff', 
-      grey: '#9c9c9c',
-    },
-    secondary: {
-      main: '#ff0080',
+      main: '#015792'
     },
     background: {
-      default: '#fafafa', 
-      paper: '#ffffff',  
+      default: '#F1F1F1',
     },
-    status: {
-      error: '#ff1a1a',
-      warning: '#ffb700',
-      success: '#05ff2f',
-    },
-    }
+    sdg: sdgPalette,
+  },
+   typography: {
+    fontFamily: '"Public Sans", sans-serif',
+  },
+  status: {
+    goalAchieved: '#4C9F38',
+    challengeOngoing: '#FCC30B',
+    yetToStart: '#E5243B',   
+  }
 });
 
 export default theme;

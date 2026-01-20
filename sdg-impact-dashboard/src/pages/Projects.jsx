@@ -15,9 +15,11 @@ export default function Projects() {
     return (
         <>
         <Paper
-        sx ={{ 
-            padding: 2, 
-            margin: 2 }}
+        sx={{ 
+            padding: 3, 
+            margin: 'auto',
+            mt: 2
+        }}
         position="absolute">
             <Typography variant="h4" component="h1" gutterBottom>
                 Projects and Publications
