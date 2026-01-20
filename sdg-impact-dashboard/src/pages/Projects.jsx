@@ -9,7 +9,7 @@ export default function Projects() {
   const [publicationQuery, setPublicationQuery] = useState('')
 
   return (
-    <div className="p-6">
+    <div className="max-w-6xl mx-auto py-6 px-4">
       <div className="bg-white rounded-xl shadow-sm p-6">
         <h1 className="text-2xl font-bold text-gray-800 mb-2">
           Projects and Publications

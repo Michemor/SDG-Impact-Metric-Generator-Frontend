@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import { AlertCircle, CheckCircle } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { AlertCircle } from 'lucide-react'
 import { createRecord, fetchMetadata } from '../services/apiClient'
+import SuccessDialog from '../components/SuccessDialog'
 
 const currentYear = new Date().getFullYear()
 
@@ -15,12 +17,21 @@ const initialFormState = {
 }
 
 export default function AddEntryPage() {
+  const navigate = useNavigate()
   const [form, setForm] = useState(initialFormState)
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState('idle')
   const [serverMessage, setServerMessage] = useState(null)
   const [metadata, setMetadata] = useState({ sdgs: [], departments: [], researchers: [] })
   const [loadingMetadata, setLoadingMetadata] = useState(true)
+  
+  // Success dialog state
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false)
+  const [successDialogConfig, setSuccessDialogConfig] = useState({
+    title: 'Success!',
+    message: '',
+    type: 'success'
+  })
 
   useEffect(() => {
     const loadMetadata = async () => {
@@ -112,9 +123,16 @@ export default function AddEntryPage() {
 
       await createRecord(payload)
       setStatus('success')
-      setServerMessage('Entry saved successfully. Reports and visualisations will include the new record.')
       setErrors({})
       setForm({ ...initialFormState })
+      
+      // Show success dialog
+      setSuccessDialogConfig({
+        title: 'Entry Added Successfully!',
+        message: `Your ${form.type} "${form.title}" has been saved. Reports and visualizations will now include this new record.`,
+        type: 'success'
+      })
+      setShowSuccessDialog(true)
     } catch (error) {
       setStatus('error')
       setServerMessage(error.message || 'Unable to save the record. Please try again.')
@@ -124,8 +142,8 @@ export default function AddEntryPage() {
   const selectedSdgs = form.sdgIds.map((id) => sdgLookup.get(Number(id))).filter(Boolean)
 
   return (
-    <div className="p-6">
-      <div className="bg-white rounded-xl shadow-sm p-6 max-w-4xl mx-auto">
+    <div className="max-w-6xl mx-auto py-6 px-4">
+      <div className="bg-white rounded-xl shadow-sm p-6">
         <h1 className="text-2xl font-bold text-blue-600 mb-2">
           Add Project or Publication
         </h1>
@@ -135,23 +153,11 @@ export default function AddEntryPage() {
           Validations run on both the client and the API to protect data quality.
         </p>
 
-        {/* Status Messages */}
-        {serverMessage && (
-          <div
-            className={`flex items-center gap-3 p-4 rounded-lg mb-6 ${
-              status === 'success'
-                ? 'bg-green-50 border border-green-200'
-                : 'bg-red-50 border border-red-200'
-            }`}
-          >
-            {status === 'success' ? (
-              <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-            ) : (
-              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-            )}
-            <p className={status === 'success' ? 'text-green-700' : 'text-red-700'}>
-              {serverMessage}
-            </p>
+        {/* Error Messages Only - Success handled by dialog */}
+        {serverMessage && status === 'error' && (
+          <div className="flex items-center gap-3 p-4 rounded-lg mb-6 bg-red-50 border border-red-200">
+            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+            <p className="text-red-700">{serverMessage}</p>
           </div>
         )}
 
@@ -335,6 +341,19 @@ export default function AddEntryPage() {
           </form>
         )}
       </div>
+
+      {/* Success Dialog */}
+      <SuccessDialog
+        isOpen={showSuccessDialog}
+        onClose={() => setShowSuccessDialog(false)}
+        title={successDialogConfig.title}
+        message={successDialogConfig.message}
+        type={successDialogConfig.type}
+        showConfetti={true}
+        autoClose={false}
+        actionLabel="View Projects"
+        onAction={() => navigate('/projects')}
+      />
     </div>
   )
 }

@@ -389,7 +389,7 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="p-6 bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 min-h-screen">
+    <div className="max-w-6xl mx-auto py-6 px-4">
       <div className="bg-white rounded-xl shadow-sm p-6">
         {/* ============================================ */}
         {/* HEADER SECTION */}

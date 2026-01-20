@@ -3,8 +3,7 @@ import {
   LayoutDashboard, 
   Briefcase, 
   GitCompare, 
-  FileText, 
-  PlusCircle 
+  FileText
 } from 'lucide-react'
 
 const menuItems = [
@@ -12,7 +11,6 @@ const menuItems = [
   { text: 'Projects and Initiatives', icon: Briefcase, path: '/projects' },
   { text: 'Benchmark', icon: GitCompare, path: '/benchmark' },
   { text: 'Reports', icon: FileText, path: '/reports' },
-  { text: 'Add Entry', icon: PlusCircle, path: '/add-entry' },
 ]
 
 export default function SideMenu({ open }) {
