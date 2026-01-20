@@ -1,83 +1,124 @@
+import { Box, Button, Chip, Paper, Stack, Typography } from '@mui/material'
+
 const StatsBadge = ({ label, value }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', padding: '0.75rem', background: '#eef2ff', borderRadius: '12px' }}>
-    <span style={{ fontSize: '0.8rem', color: '#475569' }}>{label}</span>
-    <strong style={{ fontSize: '1.1rem' }}>{value}</strong>
-  </div>
+  <Paper
+    elevation={0}
+    sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      p: 1.5,
+      bgcolor: 'primary.50',
+      borderRadius: 2,
+    }}
+  >
+    <Typography variant="caption" color="text.secondary">
+      {label}
+    </Typography>
+    <Typography variant="h6" fontWeight="bold">
+      {value}
+    </Typography>
+  </Paper>
 )
 
 const RecordList = ({ title, items, onSelect }) => (
-  <div>
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-      <strong>{title}</strong>
-      <span className="muted" style={{ fontSize: '0.85rem' }}>
+  <Box>
+    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+      <Typography variant="subtitle1" fontWeight="bold">
+        {title}
+      </Typography>
+      <Typography variant="body2" color="text.secondary">
         {items.length} item{items.length === 1 ? '' : 's'}
-      </span>
-    </div>
+      </Typography>
+    </Box>
     {items.length === 0 ? (
-      <div className="muted" style={{ fontSize: '0.9rem' }}>
+      <Typography variant="body2" color="text.secondary">
         No {title.toLowerCase()} linked to this SDG yet.
-      </div>
+      </Typography>
     ) : (
-      <div className="vertical-stack">
+      <Stack spacing={1}>
         {items.map((item) => (
-          <button key={item.id} className="record-card" onClick={() => onSelect(item.id)}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', alignItems: 'flex-start' }}>
-              <strong>{item.title}</strong>
-              <span className="muted" style={{ fontSize: '0.85rem' }}>
+          <Button
+            key={item.id}
+            variant="outlined"
+            onClick={() => onSelect(item.id)}
+            sx={{
+              justifyContent: 'flex-start',
+              textAlign: 'left',
+              textTransform: 'none',
+              p: 1.5,
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'flex-start' }}>
+              <Typography variant="subtitle2" fontWeight="bold">
+                {item.title}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
                 {item.year} • {item.department?.name ?? 'Department N/A'}
-              </span>
-              <div className="chip-list">
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
                 {item.sdgs.map((goal) => (
-                  <span key={goal.id} className="chip">
-                    {goal.code}
-                  </span>
+                  <Chip key={goal.id} label={goal.code} size="small" />
                 ))}
-              </div>
-            </div>
-          </button>
+              </Box>
+            </Box>
+          </Button>
         ))}
-      </div>
+      </Stack>
     )}
-  </div>
+  </Box>
 )
 
 const DrillDownPanel = ({ loading, error, detail, onSelectRecord }) => {
   if (loading) {
-    return <div className="muted">Loading SDG drill-down...</div>
+    return <Typography color="text.secondary">Loading SDG drill-down...</Typography>
   }
 
   if (error) {
-    return <div className="error-text">{error}</div>
+    return <Typography color="error">{error}</Typography>
   }
 
   if (!detail?.sdg) {
-    return <div className="muted">Select an SDG to explore linked projects and publications.</div>
+    return (
+      <Typography color="text.secondary">
+        Select an SDG to explore linked projects and publications.
+      </Typography>
+    )
   }
 
   return (
-    <div className="drilldown-panel">
-      <div style={{ marginBottom: '1rem' }}>
-        <div className="chip" style={{ background: '#2563eb', color: '#ffffff', alignSelf: 'flex-start' }}>
-          {detail.sdg.code}
-        </div>
-        <h3 style={{ marginBottom: '0.25rem' }}>{detail.sdg.title}</h3>
-        <div className="muted" style={{ fontSize: '0.9rem' }}>
+    <Box>
+      <Box sx={{ mb: 2 }}>
+        <Chip
+          label={detail.sdg.code}
+          sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', mb: 1 }}
+        />
+        <Typography variant="h6" sx={{ mb: 0.5 }}>
+          {detail.sdg.title}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
           Click a record to reveal its metadata. Use the export actions to capture this view in PDF or CSV format.
-        </div>
-      </div>
+        </Typography>
+      </Box>
 
-      <div className="stats-grid">
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+          gap: 1.5,
+          mb: 2,
+        }}
+      >
         <StatsBadge label="Projects" value={detail.stats.projects} />
         <StatsBadge label="Publications" value={detail.stats.publications} />
         <StatsBadge label="Departments" value={detail.stats.departments} />
         <StatsBadge label="Researchers" value={detail.stats.researchers} />
-      </div>
+      </Box>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '1.5rem' }}>
+      <Stack spacing={3}>
         <RecordList title="Projects" items={detail.projects ?? []} onSelect={onSelectRecord} />
         <RecordList title="Publications" items={detail.publications ?? []} onSelect={onSelectRecord} />
-      </div>
-    </div>
+      </Stack>
+    </Box>
   )
 }
 

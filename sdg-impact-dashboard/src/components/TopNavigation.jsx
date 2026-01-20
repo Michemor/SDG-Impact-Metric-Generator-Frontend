@@ -9,7 +9,7 @@ export default function TopNavigation({ onMenuClick }) {
         sx={(theme) => ({
             zIndex: theme.zIndex.drawer + 1,
         })}>
-            <AppBar position='absolute' color='transparent' elevation={0}
+            <AppBar position='sticky' color='transparent' elevation={0}
             sx={{
                 backgroundColor: '#ffffff',
                 backdropFilter: 'blur(10px)',

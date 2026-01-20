@@ -19,7 +19,7 @@ export default function SideMenu({ open, onClose }) {
     const [selectedIndex, setSelectedIndex] = useState(0);
     const navigate = useNavigate();
     const menuItems = [
-        { text: 'Dashboard', icon: <DashboardIcon />, path: '/'},
+        { text: 'Overview', icon: <DashboardIcon />, path: '/'},
         { text: 'Projects and Initiatives', icon: <WorkIcon />, path: '/projects' },
         { text: 'Benchmark', icon: <CompareIcon />,path: '/benchmark' },
         { text: 'Reports', icon: <ReceiptIcon />, path: '/reports' },
@@ -28,7 +28,6 @@ export default function SideMenu({ open, onClose }) {
 
     return (
         <Box 
-        
         sx={{ 
             width: open ? drawerWidth : closedDrawerWidth, 
             flexShrink: 0 ,

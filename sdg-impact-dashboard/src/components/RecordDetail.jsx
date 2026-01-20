@@ -1,44 +1,51 @@
+import { Box, Chip, Stack, Typography } from '@mui/material'
+
 const RecordDetail = ({ record }) => {
   if (!record) {
     return null
   }
 
   return (
-    <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <div>
-        <div className="chip" style={{ background: '#1d4ed8', color: '#ffffff', width: 'max-content' }}>
-          {record.type === 'project' ? 'Project' : 'Publication'}
-        </div>
-        <h3 style={{ marginBottom: '0.25rem' }}>{record.title}</h3>
-        <div className="muted" style={{ fontSize: '0.9rem' }}>
+    <Stack spacing={2} sx={{ mt: 2 }}>
+      <Box>
+        <Chip
+          label={record.type === 'project' ? 'Project' : 'Publication'}
+          sx={{ bgcolor: 'primary.dark', color: 'primary.contrastText', mb: 1 }}
+        />
+        <Typography variant="h6" sx={{ mb: 0.5 }}>
+          {record.title}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
           {record.year} • {record.department?.name ?? 'Department N/A'}
-        </div>
-      </div>
+        </Typography>
+      </Box>
 
-      <div className="chip-list">
+      <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
         {record.sdgs.map((sdg) => (
-          <span key={sdg.id} className="chip">
-            {sdg.code}
-          </span>
+          <Chip key={sdg.id} label={sdg.code} size="small" />
         ))}
-      </div>
+      </Box>
 
-      <div>
-        <strong>Researchers / Authors</strong>
-        <div className="muted" style={{ marginTop: '0.35rem' }}>
+      <Box>
+        <Typography variant="subtitle2" fontWeight="bold">
+          Researchers / Authors
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
           {record.researchers.length
             ? record.researchers.map((person) => person.name).join(', ')
             : 'No researchers linked yet.'}
-        </div>
-      </div>
+        </Typography>
+      </Box>
 
-      <div>
-        <strong>Description</strong>
-        <p className="muted" style={{ marginTop: '0.35rem' }}>
+      <Box>
+        <Typography variant="subtitle2" fontWeight="bold">
+          Description
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
           {record.description || 'No description provided yet.'}
-        </p>
-      </div>
-    </div>
+        </Typography>
+      </Box>
+    </Stack>
   )
 }
 

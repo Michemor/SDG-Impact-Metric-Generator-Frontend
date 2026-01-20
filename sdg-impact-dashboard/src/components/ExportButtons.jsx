@@ -1,3 +1,6 @@
+import { Box, Button } from '@mui/material'
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
+import TableChartIcon from '@mui/icons-material/TableChart'
 import jsPDF from 'jspdf'
 
 const formatTimestamp = (timestamp) => {
@@ -180,14 +183,24 @@ const ExportButtons = ({ summary, selectedDetail, disabled }) => {
   }
 
   return (
-    <div className="chip-list">
-      <button onClick={handlePdf} disabled={disabled}>
+    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+      <Button
+        variant="contained"
+        startIcon={<PictureAsPdfIcon />}
+        onClick={handlePdf}
+        disabled={disabled}
+      >
         Export PDF
-      </button>
-      <button onClick={handleCsv} disabled={disabled}>
+      </Button>
+      <Button
+        variant="outlined"
+        startIcon={<TableChartIcon />}
+        onClick={handleCsv}
+        disabled={disabled}
+      >
         Export CSV
-      </button>
-    </div>
+      </Button>
+    </Box>
   )
 }
 
