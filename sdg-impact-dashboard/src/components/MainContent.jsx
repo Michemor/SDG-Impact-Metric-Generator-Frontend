@@ -122,15 +122,17 @@ export default function MainContent() {
 
         <hr className="my-6 border-gray-200" />
 
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Projects Overview</h2>
+
         {/* Chart Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <div className="bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 rounded-xl p-6">
+            <div className="bg-white border border-gray-200 rounded-xl p-6">
               <div className="flex items-center gap-2 mb-1">
                 <TrendingUp className="w-6 h-6 text-blue-700" />
-                <h2 className="text-xl font-semibold text-blue-700">
+                <h3 className="text-xl font-semibold text-blue-700">
                   Project Growth Trajectory
-                </h2>
+                </h3>
               </div>
               <p className="text-sm text-blue-600 mb-4">
                 Tracking SDG project expansion from 2015 to 2025
@@ -199,11 +201,12 @@ export default function MainContent() {
         </div>
 
         <hr className="my-6 border-gray-200" />
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Publications Overview</h2>
 
         {/* SDG Publications Radar Chart with Top 5 Panel */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <div className="bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 rounded-xl p-6 h-full">
+            <div className="bg-white border border-gray-200 rounded-xl p-6 h-full">
               <div className="flex items-center gap-2 mb-1">
                 <Radar className="w-6 h-6 text-blue-700" />
                 <h2 className="text-xl font-semibold text-blue-700">
@@ -303,7 +306,10 @@ export default function MainContent() {
 
         {/* Recent Projects */}
         <div>
+          <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Recent Projects</h2>
+          <a href='/projects' className="text-blue-600 hover:underline mb-4 inline-block">View All Projects</a>
+          </div>
           <RecentProjectsTable />
         </div>
       </div>
