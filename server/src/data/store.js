@@ -1,4 +1,6 @@
-import { departments, researchers, sdgs } from './reference.js'
+import { departments, researchers as initialResearchers, sdgs } from './reference.js'
+
+let researchers = [...initialResearchers]
 
 let records = [
   {
@@ -50,6 +52,11 @@ let records = [
 export const getSdgs = () => sdgs
 export const getDepartments = () => departments
 export const getResearchers = () => researchers
+
+export const addResearcher = (researcher) => {
+  researchers = [...researchers, researcher]
+  return researcher
+}
 
 export const listRecords = () => records.map((record) => ({ ...record }))
 
