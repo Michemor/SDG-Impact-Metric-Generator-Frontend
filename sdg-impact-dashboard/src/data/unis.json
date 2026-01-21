@@ -1,10 +1,88 @@
 {
   "institutionalData": [
-    { "university": "Daystar University", "impactScore": 85 },
-    { "university": "MelWater University", "impactScore": 78 },
-    { "university": "ValleyBridge University", "impactScore": 90 },
-    { "university": "ModernWake University", "impactScore": 65 },
-    { "university": "GreenField University", "impactScore": 82 },
-    { "university": "SilverOak University", "impactScore": 74 }
+    {
+      "university": "Daystar University",
+      "impactScore": 85,
+      "rank": 1,
+      "totalProjects": 124,
+      "totalPublications": 89,
+      "sdgScores": {
+        "SDG 1": 78, "SDG 2": 65, "SDG 3": 88, "SDG 4": 95,
+        "SDG 5": 82, "SDG 6": 70, "SDG 7": 75, "SDG 8": 85,
+        "SDG 9": 80, "SDG 10": 88, "SDG 11": 72, "SDG 12": 68,
+        "SDG 13": 85, "SDG 14": 45, "SDG 15": 55, "SDG 16": 90, "SDG 17": 78
+      }
+    },
+    {
+      "university": "ValleyBridge University",
+      "impactScore": 90,
+      "rank": 2,
+      "totalProjects": 156,
+      "totalPublications": 112,
+      "sdgScores": {
+        "SDG 1": 85, "SDG 2": 78, "SDG 3": 92, "SDG 4": 88,
+        "SDG 5": 90, "SDG 6": 82, "SDG 7": 88, "SDG 8": 90,
+        "SDG 9": 85, "SDG 10": 82, "SDG 11": 78, "SDG 12": 75,
+        "SDG 13": 90, "SDG 14": 68, "SDG 15": 72, "SDG 16": 85, "SDG 17": 88
+      }
+    },
+    {
+      "university": "GreenField University",
+      "impactScore": 82,
+      "rank": 3,
+      "totalProjects": 98,
+      "totalPublications": 76,
+      "sdgScores": {
+        "SDG 1": 72, "SDG 2": 88, "SDG 3": 78, "SDG 4": 85,
+        "SDG 5": 75, "SDG 6": 85, "SDG 7": 90, "SDG 8": 78,
+        "SDG 9": 72, "SDG 10": 70, "SDG 11": 88, "SDG 12": 92,
+        "SDG 13": 95, "SDG 14": 60, "SDG 15": 85, "SDG 16": 68, "SDG 17": 72
+      }
+    },
+    {
+      "university": "MelWater University",
+      "impactScore": 78,
+      "rank": 4,
+      "totalProjects": 87,
+      "totalPublications": 65,
+      "sdgScores": {
+        "SDG 1": 70, "SDG 2": 72, "SDG 3": 82, "SDG 4": 78,
+        "SDG 5": 68, "SDG 6": 75, "SDG 7": 72, "SDG 8": 80,
+        "SDG 9": 88, "SDG 10": 75, "SDG 11": 70, "SDG 12": 65,
+        "SDG 13": 72, "SDG 14": 55, "SDG 15": 58, "SDG 16": 78, "SDG 17": 82
+      }
+    },
+    {
+      "university": "SilverOak University",
+      "impactScore": 74,
+      "rank": 5,
+      "totalProjects": 72,
+      "totalPublications": 54,
+      "sdgScores": {
+        "SDG 1": 65, "SDG 2": 60, "SDG 3": 75, "SDG 4": 82,
+        "SDG 5": 70, "SDG 6": 68, "SDG 7": 65, "SDG 8": 72,
+        "SDG 9": 78, "SDG 10": 72, "SDG 11": 65, "SDG 12": 60,
+        "SDG 13": 68, "SDG 14": 50, "SDG 15": 52, "SDG 16": 75, "SDG 17": 70
+      }
+    }
+  ],
+  "sdgLabels": [
+    { "id": "SDG 1", "title": "No Poverty", "color": "#E5243B" },
+    { "id": "SDG 2", "title": "Zero Hunger", "color": "#DDA63A" },
+    { "id": "SDG 3", "title": "Good Health", "color": "#4C9F38" },
+    { "id": "SDG 4", "title": "Quality Education", "color": "#C5192D" },
+    { "id": "SDG 5", "title": "Gender Equality", "color": "#FF3A21" },
+    { "id": "SDG 6", "title": "Clean Water", "color": "#26BDE2" },
+    { "id": "SDG 7", "title": "Clean Energy", "color": "#FCC30B" },
+    { "id": "SDG 8", "title": "Economic Growth", "color": "#A21942" },
+    { "id": "SDG 9", "title": "Innovation", "color": "#FD6925" },
+    { "id": "SDG 10", "title": "Reduced Inequalities", "color": "#DD1367" },
+    { "id": "SDG 11", "title": "Sustainable Cities", "color": "#FD9D24" },
+    { "id": "SDG 12", "title": "Responsible Consumption", "color": "#BF8B2E" },
+    { "id": "SDG 13", "title": "Climate Action", "color": "#3F7E44" },
+    { "id": "SDG 14", "title": "Life Below Water", "color": "#0A97D9" },
+    { "id": "SDG 15", "title": "Life on Land", "color": "#56C02B" },
+    { "id": "SDG 16", "title": "Peace & Justice", "color": "#00689D" },
+    { "id": "SDG 17", "title": "Partnerships", "color": "#19486A" }
   ]
 }

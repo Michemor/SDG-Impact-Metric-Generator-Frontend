@@ -1,4 +1,4 @@
-import { TrendingUp, FileText, Users, Activity, Radar } from 'lucide-react'
+import { TrendingUp, FileText, Users, Activity, Radar, Award, Briefcase, BookOpen } from 'lucide-react'
 import { 
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart,
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar as RechartsRadar
@@ -56,29 +56,49 @@ const stats = [
     title: 'Total Projects',
     value: '16',
     subtitle: '12 currently active',
-    subtitleColor: 'text-green-600',
-    icon: TrendingUp,
+    icon: Briefcase,
+    gradient: 'from-blue-50 to-blue-100',
+    border: 'border-blue-200',
+    iconColor: 'text-blue-600',
+    titleColor: 'text-blue-700',
+    valueColor: 'text-blue-800',
+    subtitleColor: 'text-blue-600',
   },
   {
-    title: 'Research Publications',
+    title: 'Publications',
     value: '10',
-    subtitle: 'SDG-aligned publications',
-    subtitleColor: 'text-blue-600',
-    icon: FileText,
+    subtitle: 'SDG-aligned works',
+    icon: BookOpen,
+    gradient: 'from-orange-50 to-orange-100',
+    border: 'border-orange-200',
+    iconColor: 'text-orange-600',
+    titleColor: 'text-orange-700',
+    valueColor: 'text-orange-800',
+    subtitleColor: 'text-orange-600',
   },
   {
     title: 'Impact Score',
-    value: '7.8/10',
-    subtitle: 'Average impact rating',
-    subtitleColor: 'text-amber-600',
-    icon: Activity,
+    value: '85',
+    subtitle: 'out of 100',
+    icon: Award,
+    gradient: 'from-purple-50 to-purple-100',
+    border: 'border-purple-200',
+    iconColor: 'text-purple-600',
+    titleColor: 'text-purple-700',
+    valueColor: 'text-purple-800',
+    subtitleColor: 'text-purple-600',
   },
   {
     title: 'Community Reach',
     value: '1,575',
-    subtitle: 'Total participants engaged',
-    subtitleColor: 'text-gray-500',
+    subtitle: 'participants engaged',
     icon: Users,
+    gradient: 'from-green-50 to-green-100',
+    border: 'border-green-200',
+    iconColor: 'text-green-600',
+    titleColor: 'text-green-700',
+    valueColor: 'text-green-800',
+    subtitleColor: 'text-green-600',
   },
 ]
 
@@ -100,21 +120,21 @@ export default function MainContent() {
           View and manage your projects related to Sustainable Development Goals (SDGs).
         </p>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+        {/* Stats Grid - Scorecard Design */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
           {stats.map((stat) => {
             const Icon = stat.icon
             return (
               <div
                 key={stat.title}
-                className="bg-gray-50 border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200"
+                className={`bg-gradient-to-br ${stat.gradient} rounded-xl p-4 border ${stat.border}`}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700">{stat.title}</span>
-                  <Icon className="w-5 h-5 text-gray-400" />
+                <div className="flex items-center gap-2 mb-2">
+                  <Icon className={`w-5 h-5 ${stat.iconColor}`} />
+                  <span className={`text-sm font-medium ${stat.titleColor}`}>{stat.title}</span>
                 </div>
-                <p className="text-3xl font-bold text-gray-900 mb-1">{stat.value}</p>
-                <p className={`text-sm ${stat.subtitleColor}`}>{stat.subtitle}</p>
+                <p className={`text-3xl font-bold ${stat.valueColor}`}>{stat.value}</p>
+                <p className={`text-sm ${stat.subtitleColor} mt-1`}>{stat.subtitle}</p>
               </div>
             )
           })}
