@@ -81,3 +81,17 @@ export const createRecord = async (payload) => {
     return { record }
   }
 }
+
+export const createResearcher = async (payload) => {
+  try {
+    return await request('/metadata/researchers', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    })
+  } catch (error) {
+    console.warn('Creating researcher using mock store:', error.message)
+    const id = `res-${Date.now()}`
+    const researcher = { id, name: payload.name, departmentId: payload.departmentId }
+    return { researcher }
+  }
+}

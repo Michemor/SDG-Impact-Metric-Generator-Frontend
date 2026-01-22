@@ -6,6 +6,28 @@ const statusColors = {
   Draft: 'bg-gray-500',
 }
 
+// Helper function to highlight matching text
+const highlightText = (text, query) => {
+  if (!query || !text) return text
+  const lowerText = String(text).toLowerCase()
+  const lowerQuery = query.toLowerCase()
+  const index = lowerText.indexOf(lowerQuery)
+  
+  if (index === -1) return text
+  
+  const before = String(text).slice(0, index)
+  const match = String(text).slice(index, index + query.length)
+  const after = String(text).slice(index + query.length)
+  
+  return (
+    <>
+      {before}
+      <mark className="bg-yellow-300 text-gray-900 px-0.5 rounded">{match}</mark>
+      {after}
+    </>
+  )
+}
+
 export default function PublicationsTable({ filterText = '' }) {
   const query = filterText.trim().toLowerCase()
   
@@ -41,8 +63,8 @@ export default function PublicationsTable({ filterText = '' }) {
         <tbody className="bg-white divide-y divide-gray-200">
           {rows.map((row) => (
             <tr key={row.id} className="hover:bg-gray-50 transition-colors">
-              <td className="px-4 py-3 text-sm font-medium text-gray-900">{row.project}</td>
-              <td className="px-4 py-3 text-sm text-gray-600">{row.type}</td>
+              <td className="px-4 py-3 text-sm font-medium text-gray-900">{highlightText(row.project, filterText)}</td>
+              <td className="px-4 py-3 text-sm text-gray-600">{highlightText(row.type, filterText)}</td>
               <td className="px-4 py-3">
                 <span
                   className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${
@@ -64,8 +86,8 @@ export default function PublicationsTable({ filterText = '' }) {
                   ))}
                 </div>
               </td>
-              <td className="px-4 py-3 text-sm text-gray-600">{row.date}</td>
-              <td className="px-4 py-3 text-sm text-gray-600">{row.department}</td>
+              <td className="px-4 py-3 text-sm text-gray-600">{highlightText(row.date, filterText)}</td>
+              <td className="px-4 py-3 text-sm text-gray-600">{highlightText(row.department, filterText)}</td>
               <td className="px-4 py-3 text-right">
                 <div className="flex flex-col items-end gap-1">
                   <span className="text-xs text-gray-500">{row.impact}%</span>
