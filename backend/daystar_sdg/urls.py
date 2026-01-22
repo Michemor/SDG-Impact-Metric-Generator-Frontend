@@ -24,7 +24,7 @@ urlpatterns = [
     
     # API routes
     path('api/', include(router.urls)),
-    path('api/dashboard/summary/', dashboard_summary, name='dashboard-summary'),
+    path('api/reports/summary/', dashboard_summary, name='dashboard-summary'),
     path('api/analytics/trends/', analytics_trends, name='analytics-trends'),
     path('api/reports/generate/<int:sdg_id>/', generate_sdg_report_pdf, name='generate-sdg-report'),
     path('api/reports/comprehensive/', generate_comprehensive_report, name='comprehensive-report'),
