@@ -7,8 +7,11 @@ The Daystar SDG Impact Dashboard & Evidence Generator is an automated platform t
 ## Features
 
 • Automated SDG classification of projects and publications
+
 • Real-time impact metrics and visualizations
+
 • Drill-down views linking SDGs to specific activities
+
 • Exportable reports for accreditation and donor reporting
 
 ## Tech Stack
