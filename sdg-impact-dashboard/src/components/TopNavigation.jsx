@@ -8,7 +8,7 @@ import {
   Menu,
   X
 } from 'lucide-react'
-import daystarLogo from '../assets/daystarlogo.png'
+import daystarLogo from '../assets/daystarLogo.png'
 
 const navItems = [
   { text: 'Overview', icon: LayoutDashboard, path: '/' },
