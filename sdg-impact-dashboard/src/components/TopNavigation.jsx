@@ -3,7 +3,7 @@ import {
   FileText,
   Menu
 } from 'lucide-react'
-import daystarLogo from '../assets/daystarlogo.png'
+import daystarLogo from "../assets/daystarLogo.png";
 
 export default function TopNavigation({ onToggleSidebar }) {
   const navigate = useNavigate()

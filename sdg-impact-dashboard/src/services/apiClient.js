@@ -1,6 +1,4 @@
 import {
-  projectsData,
-  publicationsData,
   sdgsData,
   getDashboardStats,
   getMockMetadata,
@@ -128,51 +126,16 @@ export const fetchActivities = async (type = null) => {
     throw new Error('No data returned')
   } catch (error) {
     console.warn('Falling back to mock activities:', error.message)
-    const allActivities = [...projectsData, ...publicationsData]
-    if (type) {
-      return allActivities.filter(a => a.activity_type === type)
-    }
-    return allActivities
+    return { results: [] }
   }
 }
 
 export const fetchProjects = async () => {
-
-
-  return projectsData
-  /**
-  try {
-    const response = await request('/activities/?activity_type=project')
-    const results = response?.results || response
-    if (results && results.length > 0) {
-      return results
-    } else {
-      console.warn('No projects found in API response.')
-      return projectsData
-    }
-  } catch (error) {
-    console.warn('Falling back to mock projects:', error.message)
-  }
-
-  */
+  return await fetchActivities('project')
 }
 
 export const fetchPublications = async () => {
-
-  try {
-    const response = await request('/activities/?activity_type=research')
-    console.log(response.results)
-    const results = response?.results || response
-    if (results && results.length > 0) {
-      return results
-    } else {
-      console.warn('No publications found in API response.')
-      // return publicationsData
-    }
-  } catch (error) {
-    console.warn('Falling back to mock publications:', error.message)
-   // return publicationsData
-  }
+  return await fetchActivities('publication')
 }
 
 export const fetchActivityDetail = async (id) => {
@@ -221,8 +184,7 @@ export const fetchSDGActivities = async (sdgNumber) => {
     throw new Error('No data returned')
   } catch (error) {
     console.warn('Falling back to mock SDG activities:', error.message)
-    const detail = getMockSdgDetail(sdgNumber)
-    return [...(detail?.projects || []), ...(detail?.publications || [])]
+    return []
   }
 }
 

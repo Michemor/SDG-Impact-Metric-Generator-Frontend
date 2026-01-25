@@ -11,7 +11,7 @@ import {
   Calendar,
   Activity
 } from 'lucide-react'
-import { fetchSDGs, fetchProjects, fetchPublications } from '../services/apiClient'
+import { fetchSDGs, fetchActivities } from '../services/apiClient'
 
 // Summary Card Component
 const SummaryCard = ({ label, value, color, bgColor, icon: IconComponent }) => (
@@ -30,8 +30,8 @@ const SummaryCard = ({ label, value, color, bgColor, icon: IconComponent }) => (
 
 // SDG Card Component
 const SDGCard = ({ sdg, activities, isExpanded, onToggle }) => {
-  const projects = activities.filter(a => a.activity_type === 'project' && a.sdgs?.includes(sdg.id))
-  const publications = activities.filter(a => a.activity_type === 'publication' && a.sdgs?.includes(sdg.id))
+  const projects = activities.filter(a => a.activity_type === 'Project' && a.sdg_impacts?.some(impact => impact.sdg_goal.number === sdg.number))
+  const publications = activities.filter(a => a.activity_type === 'Publication' && a.sdg_impacts?.some(impact => impact.sdg_goal.number === sdg.number))
   
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
@@ -44,13 +44,13 @@ const SDGCard = ({ sdg, activities, isExpanded, onToggle }) => {
           {/* SDG Color Badge */}
           <div
             className="w-14 h-14 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-md"
-            style={{ backgroundColor: sdg.color }}
+            style={{ backgroundColor: sdg.color || '#cccccc' }}
           >
-            {sdg.id}
+            {sdg.number}
           </div>
           <div className="text-left">
-            <h3 className="font-semibold text-gray-800 text-lg">{sdg.title}</h3>
-            <p className="text-sm text-gray-500">{sdg.code}</p>
+            <h3 className="font-semibold text-gray-800 text-lg">{sdg.name}</h3>
+            <p className="text-sm text-gray-500">{`SDG ${sdg.number}`}</p>
           </div>
         </div>
         <div className="flex items-center gap-4">
@@ -98,18 +98,18 @@ const SDGCard = ({ sdg, activities, isExpanded, onToggle }) => {
                       <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
                         <span className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
-                          {project.date}
+                          {new Date(project.date_created).toLocaleDateString()}
                         </span>
                         <span className="flex items-center gap-1">
                           <Building className="w-3 h-3" />
-                          {project.department}
+                          {project.lead_author_detail?.username}
                         </span>
                         <span className={`px-2 py-0.5 rounded text-xs font-medium ${
                           project.status === 'Active' ? 'bg-green-100 text-green-700' :
                           project.status === 'Completed' ? 'bg-purple-100 text-purple-700' :
                           'bg-blue-100 text-blue-700'
                         }`}>
-                          {project.status}
+                          {project.status || "N/A"}
                         </span>
                       </div>
                     </li>
@@ -139,17 +139,10 @@ const SDGCard = ({ sdg, activities, isExpanded, onToggle }) => {
                       <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
                         <span className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
-                          {pub.date}
+                          {new Date(pub.date_created).toLocaleDateString()}
                         </span>
                         <span className="px-2 py-0.5 bg-gray-100 rounded text-xs">
-                          {pub.type}
-                        </span>
-                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                          pub.status === 'Published' ? 'bg-green-100 text-green-700' :
-                          pub.status === 'In Review' ? 'bg-amber-100 text-amber-700' :
-                          'bg-gray-100 text-gray-700'
-                        }`}>
-                          {pub.status}
+                          {pub.activity_type_display}
                         </span>
                       </div>
                     </li>
@@ -177,13 +170,12 @@ export default function SDGAnalysis() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [sdgsData, projectsData, publicationsData] = await Promise.all([
+        const [sdgsData, activitiesData] = await Promise.all([
           fetchSDGs(),
-          fetchProjects(),
-          fetchPublications()
+          fetchActivities()
         ])
         setSDGs(sdgsData)
-        setActivities([...projectsData, ...publicationsData])
+        setActivities(activitiesData.results)
       } catch (error) {
         console.error('Error loading SDG data:', error)
       } finally {
@@ -214,10 +206,10 @@ export default function SDGAnalysis() {
   }
 
   // Calculate summary statistics
-  const totalProjects = activities.filter(a => a.activity_type === 'project').length
-  const totalPublications = activities.filter(a => a.activity_type === 'research').length
+  const totalProjects = activities.filter(a => a.activity_type === 'Project').length
+  const totalPublications = activities.filter(a => a.activity_type === 'Publication').length
   const activeSDGs = sdgs.filter(sdg => 
-    activities.some(a => a.sdgs?.includes(sdg.id))
+    activities.some(a => a.sdg_impacts?.some(impact => impact.sdg_goal.number === sdg.number))
   ).length
   const totalActivities = activities.length
 
@@ -254,43 +246,40 @@ export default function SDGAnalysis() {
             icon={FolderOpen}
             label="Total Projects"
             value={totalProjects}
-            color="text-green-600"
-            bgColor="bg-green-50 border-green-200"
+            color="text-blue-600"
+            bgColor="bg-blue-50 border-blue-200"
           />
           <SummaryCard
             icon={FileText}
-            label="Total Publications"
+            label="Publications"
             value={totalPublications}
             color="text-purple-600"
             bgColor="bg-purple-50 border-purple-200"
           />
           <SummaryCard
-            icon={TrendingUp}
+            icon={Activity}
             label="Total Activities"
             value={totalActivities}
-            color="text-orange-600"
-            bgColor="bg-orange-50 border-orange-200"
+            color="text-green-600"
+            bgColor="bg-green-50 border-green-200"
           />
         </div>
       </div>
 
       {/* Controls */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">All SDG Goals</h2>
-        <div className="flex gap-2">
-          <button
-            onClick={expandAll}
-            className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-          >
-            Expand All
-          </button>
-          <button
-            onClick={collapseAll}
-            className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-          >
-            Collapse All
-          </button>
-        </div>
+      <div className="flex justify-end gap-3 mb-6">
+        <button
+          onClick={expandAll}
+          className="text-sm font-medium text-blue-600 hover:text-blue-700"
+        >
+          Expand All
+        </button>
+        <button
+          onClick={collapseAll}
+          className="text-sm font-medium text-gray-600 hover:text-gray-700"
+        >
+          Collapse All
+        </button>
       </div>
 
       {/* SDG List */}

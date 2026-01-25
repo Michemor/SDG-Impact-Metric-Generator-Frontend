@@ -42,7 +42,11 @@ class DaystarOAIHarvester:
         values = record.metadata.get(key, [])
         if values:
             if isinstance(values, list):
-                return values[0] if len(values) == 1 else "; ".join(values)
+                # Filter out None values before processing
+                clean_values = [v for v in values if v is not None]
+                if not clean_values:
+                    return default
+                return clean_values[0] if len(clean_values) == 1 else "; ".join(clean_values)
             return values
         return default
 
@@ -88,7 +92,9 @@ class DaystarOAIHarvester:
 
         # 6. Activity Type
         types = record.metadata.get("type", [])
-        type_str = types[0].lower() if types else ""
+        type_str = ""
+        if types and types[0] is not None:
+            type_str = types[0].lower()
 
         if any(x in type_str for x in ["thesis", "dissertation"]):
             data['activity_type'] = 'Research'
@@ -106,7 +112,7 @@ class DaystarOAIHarvester:
 
         return data
 
-def harvest_records(self, start_date=None, end_date=None, limit=None):
+    def harvest_records(self, start_date=None, end_date=None, limit=None):
         """
         Harvests records and saves them to the DB.
         """
@@ -118,7 +124,7 @@ def harvest_records(self, start_date=None, end_date=None, limit=None):
         }
         
         if start_date:
-            kwargs['from_'] = start_date.strftime('%Y-%m-%d')
+            kwargs['from'] = start_date.strftime('%Y-%m-%d')
         if end_date:
             kwargs['until'] = end_date.strftime('%Y-%m-%d')
 

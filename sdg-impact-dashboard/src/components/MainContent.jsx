@@ -2,10 +2,9 @@ import { useState, useEffect } from 'react'
 import { TrendingUp, FileText, Users, Activity, Radar, Award, Briefcase, BookOpen } from 'lucide-react'
 import { 
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart,
-  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar as RechartsRadar
 } from 'recharts'
 import RecentProjectsTable from './RecentProjectsTable'
-import { fetchPublications, fetchDashboardSummary } from '../services/apiClient'
+import { fetchActivities, fetchDashboardSummary } from '../services/apiClient'
 
 const projectGrowthData = [
   { year: '2015', projects: 30 },
@@ -21,51 +20,22 @@ const projectGrowthData = [
   { year: '2025', projects: 160 },
 ]
 
-// SDG names for radar chart
-const sdgNames = [
-  'No Poverty', 'Zero Hunger', 'Good Health', 'Quality Education', 
-  'Gender Equality', 'Clean Water', 'Clean Energy', 'Decent Work',
-  'Industry', 'Reduced Inequalities', 'Sustainable Cities', 
-  'Responsible Consumption', 'Climate Action', 'Life Below Water',
-  'Life on Land', 'Peace & Justice', 'Partnerships'
-]
-
-// Calculate SDG distribution from publications
-const getSDGRadarData = (publicationsData) => {
-  const counts = Array(17).fill(0)
-  
-  publicationsData.forEach(pub => {
-    (pub.sdgs || []).forEach(sdgId => {
-      if (sdgId >= 1 && sdgId <= 17) {
-        counts[sdgId - 1]++
-      }
-    })
-  })
-  
-  return sdgNames.map((name, index) => ({
-    sdg: `SDG ${index + 1}`,
-    fullName: name,
-    publications: counts[index],
-    fullMark: Math.max(...counts, 1)
-  }))
-}
-
 const today = new Date()
 const formattedDate = today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 
 export default function MainContent() {
-  const [publications, setPublications] = useState([])
+  const [activities, setActivities] = useState([])
   const [dashboardStats, setDashboardStats] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [pubData, summaryData] = await Promise.all([
-          fetchPublications(),
+        const [activitiesData, summaryData] = await Promise.all([
+          fetchActivities(),
           fetchDashboardSummary()
         ])
-        setPublications(pubData)
+        setActivities(activitiesData.results)
         setDashboardStats(summaryData)
       } catch (error) {
         console.error('Error loading dashboard data:', error)
@@ -76,14 +46,13 @@ export default function MainContent() {
     loadData()
   }, [])
 
-  const sdgRadarData = getSDGRadarData(publications)
   
   // Build stats from API or use defaults
   const stats = [
     {
-      title: 'Total Projects',
-      value: dashboardStats?.totalProjects || '16',
-      subtitle: `${dashboardStats?.activeProjects || '12'} currently active`,
+      title: 'Total Activities',
+      value: dashboardStats?.total_activities || '0',
+      subtitle: `${dashboardStats?.total_activities || '0'} currently active`,
       icon: Briefcase,
       gradient: 'from-blue-50 to-blue-100',
       border: 'border-blue-200',
@@ -94,7 +63,7 @@ export default function MainContent() {
     },
     {
       title: 'Publications',
-      value: dashboardStats?.totalPublications || publications.length || '10',
+      value: dashboardStats?.activities_by_type?.find(item => item.activity_type === 'Publication')?.count || '0',
       subtitle: 'SDG-aligned works',
       icon: BookOpen,
       gradient: 'from-orange-50 to-orange-100',
@@ -106,7 +75,7 @@ export default function MainContent() {
     },
     {
       title: 'Impact Score',
-      value: dashboardStats?.impactScore || '85',
+      value: dashboardStats?.top_performing_sdg?.avg_score ? dashboardStats?.top_performing_sdg?.avg_score.toFixed(2) : '0',
       subtitle: 'out of 100',
       icon: Award,
       gradient: 'from-purple-50 to-purple-100',
@@ -244,108 +213,6 @@ export default function MainContent() {
         </div>
 
         <hr className="my-6 border-gray-200" />
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Publications Overview</h2>
-
-        {/* SDG Publications Radar Chart with Top 5 Panel */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <div className="bg-white border border-gray-200 rounded-xl p-6 h-full">
-              <div className="flex items-center gap-2 mb-1">
-                <Radar className="w-6 h-6 text-blue-700" />
-                <h2 className="text-xl font-semibold text-blue-700">
-                  SDG Distribution in Publications
-                </h2>
-              </div>
-              <p className="text-sm text-blue-600 mb-4">
-                Radar visualization showing how publications are distributed across the 17 SDGs
-              </p>
-              <div className="bg-white/70 rounded-lg p-4">
-                <ResponsiveContainer width="100%" height={400}>
-                  <RadarChart cx="50%" cy="50%" outerRadius="70%" data={sdgRadarData}>
-                    <PolarGrid stroke="#93c5fd" />
-                    <PolarAngleAxis 
-                      dataKey="sdg" 
-                      tick={{ fill: '#1e40af', fontSize: 11 }}
-                    />
-                    <PolarRadiusAxis 
-                      angle={90} 
-                      domain={[0, 'auto']}
-                      tick={{ fill: '#2563eb', fontSize: 10 }}
-                    />
-                    <RechartsRadar
-                      name="Publications"
-                      dataKey="publications"
-                      stroke="#2563eb"
-                      fill="#2563eb"
-                      fillOpacity={0.5}
-                      strokeWidth={2}
-                    />
-                    <Tooltip 
-                      content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          const data = payload[0].payload
-                          return (
-                            <div className="bg-white px-3 py-2 rounded-lg shadow-lg border border-blue-200">
-                              <p className="font-semibold text-blue-700">{data.sdg}</p>
-                              <p className="text-sm text-gray-600">{data.fullName}</p>
-                              <p className="text-sm font-medium text-blue-600">
-                                {data.publications} publication{data.publications !== 1 ? 's' : ''}
-                              </p>
-                            </div>
-                          )
-                        }
-                        return null
-                      }}
-                    />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-
-          {/* Top 5 SDGs Panel */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Top 5 SDGs by Publications</h3>
-            <div className="space-y-3">
-              {[...sdgRadarData]
-                .sort((a, b) => b.publications - a.publications)
-                .slice(0, 5)
-                .map((sdg, index) => (
-                  <div 
-                    key={sdg.sdg}
-                    className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 hover:bg-blue-50 transition-colors"
-                  >
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm ${
-                      index === 0 ? 'bg-yellow-500' :
-                      index === 1 ? 'bg-gray-400' :
-                      index === 2 ? 'bg-amber-600' :
-                      'bg-blue-500'
-                    }`}>
-                      {index + 1}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-800 truncate">{sdg.sdg}</p>
-                      <p className="text-xs text-gray-500 truncate">{sdg.fullName}</p>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-xl font-bold text-blue-600">{sdg.publications}</span>
-                      <p className="text-xs text-gray-500">pubs</p>
-                    </div>
-                  </div>
-                ))}
-            </div>
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-600">Total Publications</span>
-                <span className="font-semibold text-blue-600">
-                  {sdgRadarData.reduce((sum, sdg) => sum + sdg.publications, 0)}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <hr className="my-6 border-gray-200" />
 
         {/* Recent Projects */}
         <div>
@@ -353,7 +220,7 @@ export default function MainContent() {
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Recent Projects</h2>
           <a href='/projects' className="text-blue-600 hover:underline mb-4 inline-block">View All Projects</a>
           </div>
-          <RecentProjectsTable />
+          <RecentProjectsTable activities={activities} />
         </div>
       </div>
     </div>

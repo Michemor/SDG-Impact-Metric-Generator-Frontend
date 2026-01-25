@@ -37,7 +37,7 @@ export default function PublicationsTable({ filterText = '' }) {
     const loadPublications = async () => {
       try {
         const data = await fetchPublications()
-        setPublications(data)
+        setPublications(data.results)
       } catch (error) {
         console.error('Error loading publications:', error)
       } finally {
@@ -49,7 +49,7 @@ export default function PublicationsTable({ filterText = '' }) {
 
   const query = filterText.trim().toLowerCase()
   
-  const rows = publications.map((row) => {
+  const rows = publications.filter((row) => {
     if (!query) return true
     const haystack = [
       row.project || row.title,
@@ -78,7 +78,7 @@ export default function PublicationsTable({ filterText = '' }) {
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">SDGs</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Department</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Author</th>
                 <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">Impact</th>
               </tr>
             </thead>
@@ -86,37 +86,37 @@ export default function PublicationsTable({ filterText = '' }) {
               {rows.map((row) => (
                 <tr key={row.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3 text-sm font-medium text-gray-900">{highlightText(row.project || row.title, filterText)}</td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{highlightText(row.type, filterText)}</td>
+                  <td className="px-4 py-3 text-sm text-gray-600">{highlightText(row.activity_type_display, filterText)}</td>
                   <td className="px-4 py-3">
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${
                         statusColors[row.status] || 'bg-gray-500'
                       }`}
                     >
-                      {row.status}
+                      {row.status || 'N/A'}
                     </span>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-1">
-                      {(row.sdgs || []).map((sdg) => (
+                      {(row.sdg_impacts || []).map((impact) => (
                         <span
-                          key={sdg}
+                          key={impact.sdg_goal.id}
                           className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-purple-100 text-purple-800"
                         >
-                          {sdg}
+                          {impact.sdg_goal.number}
                         </span>
                       ))}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{highlightText(row.date, filterText)}</td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{highlightText(row.department, filterText)}</td>
+                  <td className="px-4 py-3 text-sm text-gray-600">{highlightText(new Date(row.date_created).toLocaleDateString(), filterText)}</td>
+                  <td className="px-4 py-3 text-sm text-gray-600">{highlightText(row.lead_author_detail?.username, filterText)}</td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex flex-col items-end gap-1">
-                      <span className="text-xs text-gray-500">{row.impact}%</span>
+                      <span className="text-xs text-gray-500">{row.impact || 'N/A'}%</span>
                       <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-gradient-to-r from-purple-400 to-purple-600 rounded-full transition-all duration-300"
-                          style={{ width: `${row.impact}%` }}
+                          style={{ width: `${row.impact || 0}%` }}
                         />
                       </div>
                     </div>

@@ -12,7 +12,8 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from impact_tracker.views import (
-    SDGGoalViewSet, ActivityViewSet, dashboard_summary, analytics_trends
+    SDGGoalViewSet, ActivityViewSet, DepartmentViewSet, ResearcherViewSet,
+    dashboard_summary, analytics_trends, dashboard_stats, benchmark_comparison
 )
 from impact_tracker.reports import generate_sdg_report_pdf, generate_comprehensive_report
 from django.conf import settings
@@ -22,6 +23,8 @@ from django.conf.urls.static import static
 router = DefaultRouter()
 router.register(r'sdg', SDGGoalViewSet, basename='sdg')
 router.register(r'activities', ActivityViewSet, basename='activity')
+router.register(r'departments', DepartmentViewSet, basename='department')
+router.register(r'researchers', ResearcherViewSet, basename='researcher')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -32,6 +35,12 @@ urlpatterns = [
     
     # API routes
     path('api/', include(router.urls)),
+    
+    # New dashboard stats endpoint from roadmap
+    path('api/dashboard-stats/', dashboard_stats, name='dashboard-stats'),
+path('api/benchmark/', benchmark_comparison, name='benchmark-comparison'),
+    
+    # Existing report/analytics endpoints
     path('api/reports/summary/', dashboard_summary, name='dashboard-summary'),
     path('api/analytics/trends/', analytics_trends, name='analytics-trends'),
     path('api/reports/generate/<int:sdg_id>/', generate_sdg_report_pdf, name='generate-sdg-report'),

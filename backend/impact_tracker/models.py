@@ -15,6 +15,7 @@ class SDGGoal(models.Model):
     )
     name = models.CharField(max_length=255, help_text="Name of the SDG")
     description = models.TextField(help_text="Detailed description of the SDG")
+    color_code = models.CharField(max_length=7, blank=True, null=True, help_text="Hex color code for the SDG (e.g., #E5243B)")
     icon_url = models.URLField(blank=True, null=True, help_text="URL to SDG icon")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -28,46 +29,78 @@ class SDGGoal(models.Model):
         return f"SDG {self.number}: {self.name}"
 
 
+class Department(models.Model):
+    """
+    Represents a department within the university.
+    """
+    name = models.CharField(max_length=255, unique=True)
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+class Researcher(models.Model):
+    """
+    Represents a researcher, linked to a User and a Department.
+    """
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True, related_name='researchers')
+    title = models.CharField(max_length=100, blank=True, null=True, help_text="Job title, e.g., Professor, Lecturer")
+
+    def __str__(self):
+        return self.user.get_full_name() or self.user.username
+
+
 class Activity(models.Model):
     """
     Generic university output/activity that contributes to SDG goals.
     """
     ACTIVITY_TYPES = [
-        ('research', 'Research'),
-        ('project', 'Project'),
-        ('curriculum', 'Curriculum'),
-        ('outreach', 'Outreach'),
-        ('publication', 'Publication'), # Added new type for scraped items
+        ('Project', 'Project'),
+        ('Publication', 'Publication'),
+    ]
+
+    STATUS_CHOICES = [
+        ('Active', 'Active'),
+        ('Completed', 'Completed'),
+        ('Published', 'Published'),
     ]
 
     title = models.CharField(max_length=255, help_text="Title of the activity")
-    description = models.TextField(help_text="Detailed description of the activity")
+    description = models.TextField(help_text="Detailed description of the activity") # This can serve as Impact Summary for now
     activity_type = models.CharField(
         max_length=20,
         choices=ACTIVITY_TYPES,
         help_text="Type of activity"
     )
-    # New field for scraped authors (dc:creator)
-    authors = models.TextField(
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Active')
+
+    # Replaced lead_author with author ForeignKey to Researcher
+    author = models.ForeignKey(
+        Researcher,
+        on_delete=models.SET_NULL,
+        related_name='activities',
+        help_text="The researcher who authored this activity",
         blank=True,
-        null=True,
-        help_text="Authors of the activity (for scraped content)"
+        null=True
     )
+
+    sdgs = models.ManyToManyField(
+        SDGGoal,
+        blank=True,
+        help_text="Which SDGs this activity is related to."
+    )
+
+    impact_summary = models.TextField(blank=True, null=True)
+
     evidence_file = models.FileField(
         upload_to='evidence/',
         blank=True,
         null=True,
         help_text="Supporting evidence (PDF, image, etc.)"
     )
-    lead_author = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL, # Changed from PROTECT to SET_NULL
-        related_name='activities',
-        help_text="User who uploaded/created this activity",
-        blank=True, # Allow null
-        null=True # Allow null
-    )
-    # New field for original publication date (dc:date)
+
+    # Kept original publication date
     original_publication_date = models.DateField(
         blank=True,
         null=True,
@@ -75,22 +108,38 @@ class Activity(models.Model):
     )
     date_created = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    # Kept existing fields to not interfere with progress
     ai_classified = models.BooleanField(
         default=False,
         help_text="Whether this activity has been classified by AI"
     )
-    # New field to indicate if the activity was scraped
     is_scraped = models.BooleanField(
         default=False,
         help_text="Whether this activity was scraped from an external source"
     )
-    # New field for external URL (dc:identifier)
     external_url = models.URLField(
-        max_length=500, # Increased max_length to accommodate long URLs
+        max_length=500,
         blank=True,
         null=True,
-        help_text="URL to the original external source of the activity"
+        help_text="URL to the original external source of the activity (Evidence Link)"
     )
+
+    # Deprecating these fields in favor of new ones but keeping for now
+    authors = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Legacy field for scraped authors (dc:creator)"
+    )
+    lead_author = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        related_name='legacy_activities', # Changed related_name to avoid clash
+        help_text="Legacy user who uploaded/created this activity",
+        blank=True,
+        null=True
+    )
+
 
     class Meta:
         ordering = ['-date_created']
@@ -166,3 +215,23 @@ class InstitutionMetric(models.Model):
 
     def __str__(self):
         return f"{self.university_name} - SDG {self.sdg_goal.number} ({self.year}): {self.score}%"
+
+
+class BenchmarkInstitution(models.Model):
+    """
+    Represents benchmark data for other institutions.
+    """
+    name = models.CharField(max_length=255, unique=True, help_text="Name of the institution (e.g., Strathmore, UoN)")
+    total_sdg_score = models.IntegerField(default=0, help_text="An aggregated SDG score for comparison.")
+    projects_count = models.IntegerField(default=0)
+    publications_count = models.IntegerField(default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = "Benchmark Institution"
+        verbose_name_plural = "Benchmark Institutions"
+
+    def __str__(self):
+        return self.name
+

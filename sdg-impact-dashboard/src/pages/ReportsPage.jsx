@@ -12,7 +12,9 @@ import {
 } from 'lucide-react'
 import ExportButtons from '../components/ExportButtons'
 import RecordDetail from '../components/RecordDetail'
+import { fetchDashboardSummary, fetchSDGActivities, fetchActivityDetail } from '../services/apiClient'
 import { sdgsData } from '../data/mockData'
+
 
 // Use centralized SDG data from mockData
 const ALL_SDGS = sdgsData
@@ -115,11 +117,11 @@ const SDGCard = ({ sdg, isExpanded, onToggle, projects, publications, loading, o
                             <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
                               <span className="flex items-center gap-1">
                                 <Calendar className="w-3 h-3" />
-                                {project.year}
+                                {new Date(project.date_created).toLocaleDateString()}
                               </span>
                               <span className="flex items-center gap-1">
                                 <Building className="w-3 h-3" />
-                                {project.department}
+                                {project.lead_author_detail?.username}
                               </span>
                             </div>
                           </div>
@@ -157,10 +159,10 @@ const SDGCard = ({ sdg, isExpanded, onToggle, projects, publications, loading, o
                             <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
                               <span className="flex items-center gap-1">
                                 <Calendar className="w-3 h-3" />
-                                {pub.year}
+                                {new Date(pub.date_created).toLocaleDateString()}
                               </span>
                               <span className="px-2 py-0.5 bg-gray-100 rounded text-xs">
-                                {pub.type}
+                                {pub.activity_type_display}
                               </span>
                             </div>
                           </div>
@@ -220,22 +222,12 @@ export default function ReportsPage() {
       setTotalsError(null)
       
       try {
-        // =============================================
-        // TODO: Replace with actual API call
-        // =============================================
-        // const response = await fetch('/api/reports/summary')
-        // if (!response.ok) throw new Error('Failed to fetch summary')
-        // const data = await response.json()
-        // setTotals(data.totals)
-        // =============================================
-
-        // MOCK DATA - Remove when connecting to real API
-        await new Promise(resolve => setTimeout(resolve, 500)) // Simulate network delay
+        const data = await fetchDashboardSummary()
         setTotals({
-          projects: 16,
-          publications: 10,
-          departments: 8,
-          researchers: 24
+          projects: data.activities_by_type?.find(item => item.activity_type === 'Project')?.count || 0,
+          publications: data.activities_by_type?.find(item => item.activity_type === 'Publication')?.count || 0,
+          departments: data.top_authors?.length || 0,
+          researchers: data.total_impacts
         })
       } catch (error) {
         setTotalsError(error.message || 'Failed to load summary data')
@@ -263,39 +255,15 @@ export default function ReportsPage() {
     }))
 
     try {
-      // =============================================
-      // TODO: Replace with actual API calls
-      // =============================================
-      // Fetch projects and publications for this SDG in parallel
-      // const [projectsRes, publicationsRes] = await Promise.all([
-      //   fetch(`/api/sdgs/${sdgId}/projects`),
-      //   fetch(`/api/sdgs/${sdgId}/publications`)
-      // ])
-      // 
-      // if (!projectsRes.ok) throw new Error('Failed to fetch projects')
-      // if (!publicationsRes.ok) throw new Error('Failed to fetch publications')
-      // 
-      // const projects = await projectsRes.json()
-      // const publications = await publicationsRes.json()
-      // 
-      // setSdgData(prev => ({
-      //   ...prev,
-      //   [sdgId]: { projects, publications, loading: false }
-      // }))
-      // =============================================
-
-      // MOCK DATA - Remove when connecting to real API
-      await new Promise(resolve => setTimeout(resolve, 800)) // Simulate network delay
+      const activities = await fetchSDGActivities(sdgId)
+      const projects = activities.filter(a => a.activity_type === 'Project')
+      const publications = activities.filter(a => a.activity_type === 'Publication')
       
-      // Mock projects data based on SDG
-      const mockProjects = getMockProjectsForSDG(sdgId)
-      const mockPublications = getMockPublicationsForSDG(sdgId)
-
       setSdgData(prev => ({
         ...prev,
         [sdgId]: { 
-          projects: mockProjects, 
-          publications: mockPublications, 
+          projects: projects, 
+          publications: publications, 
           loading: false 
         }
       }))
@@ -328,28 +296,8 @@ export default function ReportsPage() {
     setRecordError(null)
 
     try {
-      // =============================================
-      // TODO: Replace with actual API call
-      // =============================================
-      // const response = await fetch(`/api/records/${recordId}`)
-      // if (!response.ok) throw new Error('Failed to fetch record details')
-      // const data = await response.json()
-      // setFocusedRecord(data)
-      // =============================================
-
-      // MOCK DATA - Remove when connecting to real API
-      await new Promise(resolve => setTimeout(resolve, 500))
-      setFocusedRecord({
-        id: recordId,
-        type: recordId.startsWith('PUB') ? 'publication' : 'project',
-        title: 'Sample Record Title',
-        description: 'This is a detailed description of the record that would come from the API.',
-        year: 2025,
-        department: 'Research Department',
-        sdgs: [1, 4, 10],
-        researchers: ['Dr. Jane Smith', 'Prof. John Doe'],
-        status: 'Active'
-      })
+      const data = await fetchActivityDetail(recordId)
+      setFocusedRecord(data)
     } catch (error) {
       setRecordError(error.message || 'Failed to load record details')
     } finally {
@@ -499,126 +447,4 @@ export default function ReportsPage() {
       )}
     </div>
   )
-}
-
-// ============================================
-// MOCK DATA FUNCTIONS
-// TODO: Remove these when connecting to real API
-// ============================================
-
-function getMockProjectsForSDG(sdgId) {
-  // Mock projects mapped to different SDGs
-  const projectsBySDG = {
-    1: [
-      { id: 'P-009', title: 'Affordable Housing Initiative', year: 2025, department: 'Urban Development' },
-    ],
-    2: [
-      { id: 'P-012', title: 'Food Security Gardens', year: 2025, department: 'Agriculture' },
-    ],
-    3: [
-      { id: 'P-002', title: 'Maternal Health Outreach', year: 2025, department: 'Public Health' },
-    ],
-    4: [
-      { id: 'P-001', title: 'Community Literacy Program', year: 2025, department: 'Education' },
-      { id: 'P-007', title: 'Youth Skills Bootcamp', year: 2025, department: 'Education' },
-    ],
-    5: [
-      { id: 'P-002', title: 'Maternal Health Outreach', year: 2025, department: 'Public Health' },
-    ],
-    6: [
-      { id: 'P-006', title: 'Rural Water Access', year: 2025, department: 'Sustainability' },
-    ],
-    7: [
-      { id: 'P-003', title: 'Green Tech Incubator', year: 2026, department: 'Engineering' },
-      { id: 'P-008', title: 'Waste-to-Energy Pilot', year: 2026, department: 'Engineering' },
-    ],
-    8: [
-      { id: 'P-005', title: 'Partnership Network Expansion', year: 2025, department: 'External Relations' },
-      { id: 'P-007', title: 'Youth Skills Bootcamp', year: 2025, department: 'Education' },
-    ],
-    9: [
-      { id: 'P-003', title: 'Green Tech Incubator', year: 2026, department: 'Engineering' },
-      { id: 'P-011', title: 'Digital Inclusion Labs', year: 2025, department: 'IT & Innovation' },
-    ],
-    10: [
-      { id: 'P-001', title: 'Community Literacy Program', year: 2025, department: 'Education' },
-      { id: 'P-011', title: 'Digital Inclusion Labs', year: 2025, department: 'IT & Innovation' },
-    ],
-    11: [
-      { id: 'P-006', title: 'Rural Water Access', year: 2025, department: 'Sustainability' },
-      { id: 'P-009', title: 'Affordable Housing Initiative', year: 2025, department: 'Urban Development' },
-    ],
-    12: [
-      { id: 'P-003', title: 'Green Tech Incubator', year: 2026, department: 'Engineering' },
-      { id: 'P-008', title: 'Waste-to-Energy Pilot', year: 2026, department: 'Engineering' },
-      { id: 'P-012', title: 'Food Security Gardens', year: 2025, department: 'Agriculture' },
-    ],
-    13: [
-      { id: 'P-008', title: 'Waste-to-Energy Pilot', year: 2026, department: 'Engineering' },
-      { id: 'P-010', title: 'Climate Resilience Program', year: 2025, department: 'Sustainability' },
-    ],
-    14: [],
-    15: [
-      { id: 'P-010', title: 'Climate Resilience Program', year: 2025, department: 'Sustainability' },
-    ],
-    16: [
-      { id: 'P-004', title: 'Justice Awareness Campaign', year: 2025, department: 'Civic Engagement' },
-    ],
-    17: [
-      { id: 'P-005', title: 'Partnership Network Expansion', year: 2025, department: 'External Relations' },
-    ],
-  }
-  
-  return projectsBySDG[sdgId] || []
-}
-
-function getMockPublicationsForSDG(sdgId) {
-  // Mock publications mapped to different SDGs
-  const publicationsBySDG = {
-    1: [
-      { id: 'PUB-008', title: 'Urban Housing Affordability', year: 2026, type: 'Book Chapter' },
-    ],
-    2: [],
-    3: [
-      { id: 'PUB-002', title: 'Maternal Health Outcomes 2025', year: 2025, type: 'Report' },
-      { id: 'PUB-006', title: 'Water Access and Health', year: 2025, type: 'Journal Article' },
-    ],
-    4: [
-      { id: 'PUB-001', title: 'Assessing Literacy Interventions', year: 2025, type: 'Journal Article' },
-      { id: 'PUB-007', title: 'Skills Programs Impact', year: 2025, type: 'Report' },
-    ],
-    5: [
-      { id: 'PUB-002', title: 'Maternal Health Outcomes 2025', year: 2025, type: 'Report' },
-    ],
-    6: [
-      { id: 'PUB-006', title: 'Water Access and Health', year: 2025, type: 'Journal Article' },
-    ],
-    7: [
-      { id: 'PUB-003', title: 'Green Incubation Models', year: 2026, type: 'Conference Paper' },
-    ],
-    8: [
-      { id: 'PUB-007', title: 'Skills Programs Impact', year: 2025, type: 'Report' },
-    ],
-    9: [
-      { id: 'PUB-003', title: 'Green Incubation Models', year: 2026, type: 'Conference Paper' },
-    ],
-    10: [],
-    11: [
-      { id: 'PUB-008', title: 'Urban Housing Affordability', year: 2026, type: 'Book Chapter' },
-    ],
-    12: [
-      { id: 'PUB-003', title: 'Green Incubation Models', year: 2026, type: 'Conference Paper' },
-    ],
-    13: [],
-    14: [],
-    15: [],
-    16: [
-      { id: 'PUB-004', title: 'Justice Systems and SDG 16', year: 2025, type: 'Journal Article' },
-    ],
-    17: [
-      { id: 'PUB-005', title: 'Public-Private Partnerships for SDGs', year: 2026, type: 'Whitepaper' },
-    ],
-  }
-  
-  return publicationsBySDG[sdgId] || []
 }
