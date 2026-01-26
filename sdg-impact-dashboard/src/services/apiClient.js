@@ -11,136 +11,87 @@ import {
   getRecentProjects,
 } from '../data/mockData'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/'
 
-let accessToken = localStorage.getItem('access_token')
-let refreshToken = localStorage.getItem('refresh_token')
 
-export const setTokens = (access, refresh) => {
-  accessToken = access
-  refreshToken = refresh
-  localStorage.setItem('access_token', access)
-  localStorage.setItem('refresh_token', refresh)
-}
-
-export const clearTokens = () => {
-  accessToken = null
-  refreshToken = null
-  localStorage.removeItem('access_token')
-  localStorage.removeItem('refresh_token')
+// --- JWT Auth Helpers ---
+const getTokenData = () => {
+  return {
+    access: localStorage.getItem('apiToken'),
+    refresh: localStorage.getItem('apiRefreshToken'),
+    expiry: parseInt(localStorage.getItem('apiTokenExpiry'), 10) || 0,
+  }
 }
 
 export const login = async (username, password) => {
-  const response = await fetch(`${API_BASE_URL}/token/`, {
+  const response = await fetch(`${API_BASE_URL}token/`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password }),
   })
-
-  if (!response.ok) {
-    throw new Error('Invalid credentials')
-  }
-
+  if (!response.ok) throw new Error('Login failed')
   const data = await response.json()
-  setTokens(data.access, data.refresh)
+  localStorage.setItem('apiToken', data.access)
+  localStorage.setItem('apiRefreshToken', data.refresh)
+  // JWTs usually have exp in seconds, but DRF SimpleJWT returns expires_in (seconds) or you can decode the token for exp
+  // Here, we assume expires_in is present, otherwise set a default (5 min)
+  const expiresIn = data.expires_in ? data.expires_in : 300
+  localStorage.setItem('apiTokenExpiry', Date.now() + expiresIn * 1000)
   return data
 }
 
 export const logout = () => {
-  clearTokens()
+  localStorage.removeItem('apiToken')
+  localStorage.removeItem('apiRefreshToken')
+  localStorage.removeItem('apiTokenExpiry')
   window.location.href = '/login'
 }
 
-export const refreshAccessToken = async () => {
-  if (!refreshToken) {
-    throw new Error('No refresh token available')
+const request = async (endpoint, options = {}) => {
+  let { access, refresh, expiry } = getTokenData()
+  // If token expired, try to refresh
+  if (!access || Date.now() >= expiry) {
+    if (!refresh) throw new Error('No refresh token available. Please login again.')
+    const refreshResponse = await fetch(`${API_BASE_URL}token/refresh/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh }),
+    })
+    if (!refreshResponse.ok) {
+      logout()
+      throw new Error('Session expired. Please login again.')
+    }
+    const refreshData = await refreshResponse.json()
+    access = refreshData.access
+    localStorage.setItem('apiToken', access)
+    const expiresIn = refreshData.expires_in ? refreshData.expires_in : 300
+    localStorage.setItem('apiTokenExpiry', Date.now() + expiresIn * 1000)
   }
-
-  const response = await fetch(`${API_BASE_URL}/token/refresh/`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ refresh: refreshToken }),
-  })
-
-  if (!response.ok) {
-    clearTokens()
-    throw new Error('Session expired. Please login again.')
-  }
-
-  const data = await response.json()
-  accessToken = data.access
-  localStorage.setItem('access_token', data.access)
-  return data.access
-}
-
-const request = async (path, options = {}, retry = true) => {
   const headers = {
-    'Content-Type': 'application/json',
-    ...options.headers,
+    ...(options.headers || {}),
+    'Authorization': `Bearer ${access}`,
   }
-
-  if (accessToken) {
-    headers['Authorization'] = `Bearer ${accessToken}`
-  }
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers,
   })
-
-  if (response.status === 401 && retry && refreshToken) {
-    try {
-      await refreshAccessToken()
-      return request(path, options, false)
-    } catch (error) {
-      clearTokens()
-      console.error('Token refresh failed:', error)
-      throw new Error('Session expired. Please login again.')
-    }
-  }
-
   if (!response.ok) {
-    const errorBody = await response.json().catch(() => ({}))
-    const message = errorBody?.message || 'Failed to load data from the server.'
-    throw new Error(message)
+    // If 401, try to logout and force re-login
+    if (response.status === 401) {
+      logout()
+      throw new Error('Unauthorized. Please login again.')
+    }
+    throw new Error(`API request failed with status ${response.status}: ${response.statusText}`)
   }
-
-  return response.json()
+  return await response.json()
 }
-
-export const isAuthenticated = () => !!accessToken
 
 
 // ============ Activities (with mock data fallback) =============
 
-export const fetchActivities = async (type = null) => {
-  try {
-    const params = type ? `?activity_type=${type}` : ''
-    const response = await request(`/activities/${params}`)
-    // Check if response has data
-    const results = response?.results || response
-    if (results && results.length > 0) {
-      return response
-    }
-    throw new Error('No data returned')
-  } catch (error) {
-    console.warn('Falling back to mock activities:', error.message)
-    const allActivities = [...projectsData, ...publicationsData]
-    if (type) {
-      return allActivities.filter(a => a.activity_type === type)
-    }
-    return allActivities
-  }
-}
 
 export const fetchProjects = async () => {
 
-
-  return projectsData
-  /**
   try {
     const response = await request('/activities/?activity_type=project')
     const results = response?.results || response
@@ -152,9 +103,8 @@ export const fetchProjects = async () => {
     }
   } catch (error) {
     console.warn('Falling back to mock projects:', error.message)
+    return projectsData
   }
-
-  */
 }
 
 export const fetchPublications = async () => {
@@ -167,11 +117,11 @@ export const fetchPublications = async () => {
       return results
     } else {
       console.warn('No publications found in API response.')
-      // return publicationsData
+      return publicationsData
     }
   } catch (error) {
     console.warn('Falling back to mock publications:', error.message)
-   // return publicationsData
+    return publicationsData
   }
 }
 

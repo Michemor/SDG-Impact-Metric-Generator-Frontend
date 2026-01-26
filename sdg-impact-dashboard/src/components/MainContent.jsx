@@ -6,6 +6,7 @@ import {
 } from 'recharts'
 import RecentProjectsTable from './RecentProjectsTable'
 import { fetchPublications, fetchDashboardSummary } from '../services/apiClient'
+import { publicationsData } from '../data/mockData'
 
 const projectGrowthData = [
   { year: '2015', projects: 30 },
@@ -94,7 +95,7 @@ export default function MainContent() {
     },
     {
       title: 'Publications',
-      value: dashboardStats?.totalPublications || publications.length || '10',
+      value: dashboardStats?.totalPublications || publicationsData.length || '10',
       subtitle: 'SDG-aligned works',
       icon: BookOpen,
       gradient: 'from-orange-50 to-orange-100',
@@ -129,6 +130,13 @@ export default function MainContent() {
       subtitleColor: 'text-green-600',
     },
   ]
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <span className="text-blue-600 text-lg font-semibold">Loading...</span>
+      </div>
+    );
+  }
   return (
     <div className="max-w-6xl mx-auto py-6 px-4">
       {/* Welcome Card */}
