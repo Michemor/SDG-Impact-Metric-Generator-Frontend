@@ -168,6 +168,8 @@ export const getMockRecordDetail = (recordId) => {
   return record ? resolveRecord(record) : null
 }
 
+export const getMockRecords = () => records.map(resolveRecord)
+
 export const addMockRecord = (payload) => {
   const newRecord = {
     ...payload,

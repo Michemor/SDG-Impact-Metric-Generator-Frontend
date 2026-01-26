@@ -1,4 +1,5 @@
-import { projectsData } from '../data/mockData'
+import { useEffect, useState } from 'react'
+import { fetchActivities } from '../services/apiClient'
 
 const statusColors = {
   Active: 'bg-green-500',
@@ -6,11 +7,71 @@ const statusColors = {
   Completed: 'bg-purple-600',
 }
 
+const formatDate = (value) => {
+  if (!value) return '—'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return date.toLocaleDateString()
+}
+
 export default function RecentProjectsTable() {
-  // Get the 5 most recent projects
-  const recentProjects = [...projectsData]
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
-    .slice(0, 5)
+  const [rows, setRows] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true)
+      setError(null)
+      try {
+        const data = await fetchActivities({ activity_type: 'project', page: 1 })
+        // API may return paginated results or a plain array
+        const items = Array.isArray(data?.results) ? data.results : Array.isArray(data) ? data : []
+        const recent = [...items]
+          .sort((a, b) => new Date(b.date_created || b.date || 0) - new Date(a.date_created || a.date || 0))
+          .slice(0, 5)
+          .map((item) => ({
+            id: item.id,
+            project: item.title,
+            status: item.status || 'Active',
+            sdgs: (item.sdg_impacts || item.sdgs || []).map((s) => s.sdg_goal || s.number || s) ,
+            department: item.lead_author_detail?.email || '—',
+            impact: item.ai_classified ? 80 : 50,
+            date: item.date_created || item.date,
+          }))
+        setRows(recent)
+      } catch (err) {
+        setError(err.message || 'Failed to load projects')
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [])
+
+  if (error) {
+    return (
+      <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700 text-sm">
+        {error}
+      </div>
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-6 text-sm text-gray-600">
+        Loading recent projects…
+      </div>
+    )
+  }
+
+  if (!rows.length) {
+    return (
+      <div className="flex items-center justify-center py-6 text-sm text-gray-600 border border-dashed border-gray-200 rounded-lg">
+        No projects found yet.
+      </div>
+    )
+  }
 
   return (
     <div className="overflow-x-auto border border-gray-200 rounded-lg">
@@ -20,12 +81,12 @@ export default function RecentProjectsTable() {
             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Project</th>
             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">SDGs</th>
-            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Department</th>
+            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Created</th>
             <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">Impact</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {recentProjects.map((row) => (
+          {rows.map((row) => (
             <tr key={row.id} className="hover:bg-gray-50 transition-colors">
               <td className="px-4 py-3 text-sm font-medium text-gray-900">{row.project}</td>
               <td className="px-4 py-3">
@@ -39,7 +100,7 @@ export default function RecentProjectsTable() {
               </td>
               <td className="px-4 py-3">
                 <div className="flex flex-wrap gap-1">
-                  {row.sdgs.map((sdg) => (
+                  {(row.sdgs || []).map((sdg) => (
                     <span
                       key={sdg}
                       className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-blue-100 text-blue-800"
@@ -49,7 +110,7 @@ export default function RecentProjectsTable() {
                   ))}
                 </div>
               </td>
-              <td className="px-4 py-3 text-sm text-gray-600">{row.department}</td>
+              <td className="px-4 py-3 text-sm text-gray-600">{formatDate(row.date)}</td>
               <td className="px-4 py-3 text-right">
                 <div className="flex flex-col items-end gap-1">
                   <span className="text-xs text-gray-500">{row.impact}%</span>
