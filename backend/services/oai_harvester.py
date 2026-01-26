@@ -7,8 +7,8 @@ from sickle import Sickle
 
 # --- Django Setup for Standalone Execution ---
 if __name__ == "__main__":
-    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.settings")
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "daystar_sdg.settings")
     import django
     django.setup()
 
