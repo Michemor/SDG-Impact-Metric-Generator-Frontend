@@ -36,7 +36,7 @@ class Command(BaseCommand):
             (9, 'Industry, Innovation and Infrastructure', '#FD6925'),
             (10, 'Reduced Inequality', '#DD1367'),
             (11, 'Sustainable Cities and Communities', '#FD9D24'),
-            (12, 'Responsible Consumption and Production', '#BF8B2E'),
+            (12, 'Responsible Consumption and Production', '#BF8B2E'), 
             (13, 'Climate Action', '#3F7E44'),
             (14, 'Life Below Water', '#0A97D9'),
             (15, 'Life on Land', '#56C02B'),

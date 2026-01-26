@@ -1,23 +1,60 @@
-import { useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, 
   ResponsiveContainer 
 } from 'recharts'
 import { Trophy, TrendingUp, Target, Award, Briefcase, BookOpen } from 'lucide-react'
-import institutionalData from '../data/unis.json'
+import { fetchBenchmarkData, fetchSDGs } from '../services/apiClient'
 
 const institutionColors = {
   'Daystar University': '#2563eb',
-  'ValleyBridge University': '#16a34a',
-  'GreenField University': '#f59e0b',
-  'MelWater University': '#9333ea',
-  'SilverOak University': '#ec4899',
+  'Strathmore University': '#16a34a',
+  'University of Nairobi': '#f59e0b',
+  'Kenyatta University': '#9333ea',
+  'Default': '#ec4899',
 }
 
 export default function Benchmark() {
-  const universities = institutionalData.institutionalData
-  const sdgLabels = institutionalData.sdgLabels
-  const daystar = universities.find(u => u.university === 'Daystar University')
+  const [universities, setUniversities] = useState([]);
+  const [sdgLabels, setSdgLabels] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [benchmarkData, sdgData] = await Promise.all([
+          fetchBenchmarkData(),
+          fetchSDGs(),
+        ]);
+
+        setUniversities(benchmarkData.map(uni => ({
+          university: uni.name,
+          impactScore: uni.total_sdg_score,
+          totalProjects: uni.projects_count,
+          totalPublications: uni.publications_count,
+          sdgScores: {}, // This data is not available from the backend yet
+        })));
+
+        setSdgLabels(sdgData.map(sdg => ({
+          id: `SDG ${sdg.number}`,
+          title: sdg.name,
+          color: sdg.color_code,
+        })));
+
+      } catch (err) {
+        setError('Failed to load benchmark data. Please try again later.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const daystar = useMemo(() => universities.find(u => u.university === 'Daystar University'), [universities]);
 
   // Prepare data for peer comparison bar chart
   const peerComparisonData = useMemo(() => {
@@ -26,13 +63,15 @@ export default function Benchmark() {
       .map((uni) => ({
         name: uni.university.replace(' University', ''),
         impactScore: uni.impactScore,
-        fill: institutionColors[uni.university],
+        fill: institutionColors[uni.university] || institutionColors.Default,
       }))
   }, [universities])
 
   // Calculate Daystar's strengths and weaknesses
   const sdgAnalysis = useMemo(() => {
-    if (!daystar) return { strengths: [], weaknesses: [] }
+    if (!daystar || Object.keys(daystar.sdgScores).length === 0) {
+      return { strengths: [], weaknesses: [] };
+    }
     const scores = Object.entries(daystar.sdgScores)
       .map(([sdg, score]) => ({ sdg, score, label: sdgLabels.find(s => s.id === sdg)?.title }))
       .sort((a, b) => b.score - a.score)
@@ -43,16 +82,24 @@ export default function Benchmark() {
   }, [daystar, sdgLabels])
 
   // Daystar's rank among peers
-  const daystarRank = universities.findIndex(u => u.university === 'Daystar University') + 1
-  const avgScore = Math.round(universities.reduce((sum, u) => sum + u.impactScore, 0) / universities.length)
+  const daystarRank = useMemo(() => universities.sort((a, b) => b.impactScore - a.impactScore).findIndex(u => u.university === 'Daystar University') + 1, [universities]);
+  const avgScore = useMemo(() => Math.round(universities.reduce((sum, u) => sum + u.impactScore, 0) / (universities.length || 1)), [universities]);
 
+  if (loading) {
+    return <div className="text-center p-8">Loading Benchmark Data...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center p-8 text-red-600">{error}</div>;
+  }
+  
   return (
     <div className="max-w-7xl mx-auto py-6 px-4 space-y-6">
       {/* Page Header */}
       <div className="bg-white rounded-xl shadow-sm p-6">
         <h1 className="text-2xl font-bold text-gray-800 mb-2">SDG Benchmark Analysis</h1>
         <p className="text-gray-600">
-          Compare Daystar University's SDG impact performance against peer institutions across all 17 Sustainable Development Goals.
+          Compare Daystar University's SDG impact performance against peer institutions.
         </p>
       </div>
 
@@ -70,7 +117,7 @@ export default function Benchmark() {
               <Award className="w-5 h-5 text-blue-600" />
               <span className="text-sm font-medium text-blue-700">Overall Score</span>
             </div>
-            <p className="text-3xl font-bold text-blue-800">{daystar?.impactScore}</p>
+            <p className="text-3xl font-bold text-blue-800">{daystar?.impactScore || 'N/A'}</p>
             <p className="text-sm text-blue-600 mt-1">out of 100</p>
           </div>
 
@@ -79,7 +126,7 @@ export default function Benchmark() {
               <TrendingUp className="w-5 h-5 text-purple-600" />
               <span className="text-sm font-medium text-purple-700">Peer Ranking</span>
             </div>
-            <p className="text-3xl font-bold text-purple-800">#{daystarRank}</p>
+            <p className="text-3xl font-bold text-purple-800">#{daystarRank > 0 ? daystarRank : 'N/A'}</p>
             <p className="text-sm text-purple-600 mt-1">of {universities.length} institutions</p>
           </div>
 
@@ -102,48 +149,54 @@ export default function Benchmark() {
           </div>
         </div>
 
-        {/* Strengths and Weaknesses */}
-        <div className="grid md:grid-cols-2 gap-4">
-          <div className="bg-green-50 rounded-xl p-4 border border-green-200">
-            <h3 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
-              <Target className="w-5 h-5" />
-              Top Performing SDGs
-            </h3>
-            <div className="space-y-2">
-              {sdgAnalysis.strengths.map((item, index) => (
-                <div key={item.sdg} className="flex items-center justify-between bg-white rounded-lg p-3">
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-green-600 text-white text-xs flex items-center justify-center font-bold">
-                      {index + 1}
-                    </span>
-                    <span className="text-sm font-medium text-gray-700">{item.sdg}: {item.label}</span>
+        {/* Strengths and Weaknesses - Conditionally rendered */}
+        {sdgAnalysis.strengths.length > 0 ? (
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="bg-green-50 rounded-xl p-4 border border-green-200">
+              <h3 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
+                <Target className="w-5 h-5" />
+                Top Performing SDGs
+              </h3>
+              <div className="space-y-2">
+                {sdgAnalysis.strengths.map((item, index) => (
+                  <div key={item.sdg} className="flex items-center justify-between bg-white rounded-lg p-3">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-green-600 text-white text-xs flex items-center justify-center font-bold">
+                        {index + 1}
+                      </span>
+                      <span className="text-sm font-medium text-gray-700">{item.sdg}: {item.label}</span>
+                    </div>
+                    <span className="font-bold text-green-700">{item.score}</span>
                   </div>
-                  <span className="font-bold text-green-700">{item.score}</span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div className="bg-orange-50 rounded-xl p-4 border border-orange-200">
-            <h3 className="font-semibold text-orange-800 mb-3 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5" />
-              Areas for Improvement
-            </h3>
-            <div className="space-y-2">
-              {sdgAnalysis.weaknesses.map((item, index) => (
-                <div key={item.sdg} className="flex items-center justify-between bg-white rounded-lg p-3">
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-orange-500 text-white text-xs flex items-center justify-center font-bold">
-                      {index + 1}
-                    </span>
-                    <span className="text-sm font-medium text-gray-700">{item.sdg}: {item.label}</span>
+            <div className="bg-orange-50 rounded-xl p-4 border border-orange-200">
+              <h3 className="font-semibold text-orange-800 mb-3 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5" />
+                Areas for Improvement
+              </h3>
+              <div className="space-y-2">
+                {sdgAnalysis.weaknesses.map((item, index) => (
+                  <div key={item.sdg} className="flex items-center justify-between bg-white rounded-lg p-3">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-orange-500 text-white text-xs flex items-center justify-center font-bold">
+                        {index + 1}
+                      </span>
+                      <span className="text-sm font-medium text-gray-700">{item.sdg}: {item.label}</span>
+                    </div>
+                    <span className="font-bold text-orange-700">{item.score}</span>
                   </div>
-                  <span className="font-bold text-orange-700">{item.score}</span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="text-center text-gray-500 bg-gray-50 p-6 rounded-xl">
+            Detailed SDG score breakdown is not available for benchmark comparison yet.
+          </div>
+        )}
       </div>
 
       {/* Section 2: Peer-to-Peer Institutional Comparison */}
@@ -182,7 +235,6 @@ export default function Benchmark() {
                 <Bar 
                   dataKey="impactScore" 
                   radius={[0, 4, 4, 0]}
-                  fill="#2563eb"
                 >
                   {peerComparisonData.map((entry, index) => (
                     <Bar key={`bar-${index}`} fill={entry.fill} />
@@ -229,7 +281,7 @@ export default function Benchmark() {
                     <div className="text-right">
                       <div 
                         className="text-2xl font-bold"
-                        style={{ color: institutionColors[uni.university] }}
+                        style={{ color: institutionColors[uni.university] || institutionColors.Default }}
                       >
                         {uni.impactScore}
                       </div>

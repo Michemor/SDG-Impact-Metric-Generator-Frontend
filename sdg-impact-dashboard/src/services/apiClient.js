@@ -199,9 +199,6 @@ export const fetchSDGSummary = async (sdgNumber) => {
 // ========== Reports (with mock data fallback) ==========
 
 export const fetchDashboardSummary = async () => {
-
-  return getMockSummary()
-  /**
   try {
     const response = await request('/reports/summary/')
     if (response) {
@@ -212,7 +209,6 @@ export const fetchDashboardSummary = async () => {
     console.warn('Falling back to mock dashboard summary:', error.message)
     return getMockSummary()
   }
-     */
 }
 
 // ========== Dashboard Stats ==========
@@ -243,6 +239,23 @@ export const fetchRecentProjects = async (limit = 5) => {
   } catch (error) {
     console.warn('Falling back to mock recent projects:', error.message)
     return getRecentProjects(limit)
+  }
+}
+
+// ========== Benchmark ==========
+
+export const fetchBenchmarkData = async () => {
+  try {
+    const response = await request('/benchmark/')
+    if (response && response.length > 0) {
+      return response
+    }
+    throw new Error('No data returned')
+  } catch (error) {
+    console.warn('Falling back to mock benchmark data:', error.message)
+    // In a real app, you might want a more robust mock fallback.
+    // For now, returning an empty array to avoid breaking the UI.
+    return []
   }
 }
 
