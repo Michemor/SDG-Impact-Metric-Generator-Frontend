@@ -7,7 +7,6 @@ import {
   Target,
   LogOut
 } from 'lucide-react'
-import { logout } from '../services/apiClient'
 
 const menuItems = [
   { text: 'Overview', icon: LayoutDashboard, path: '/' },
@@ -59,19 +58,7 @@ export default function SideMenu({ open }) {
         </ul>
       </nav>
 
-      {/* Logout Button */}
-      <div className="p-2 border-t border-gray-200">
-        <button
-          onClick={logout}
-          className="w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 group text-red-600 hover:bg-red-50"
-          title={!open ? 'Logout' : undefined}
-        >
-          <LogOut className="w-5 h-5 flex-shrink-0" />
-          {open && (
-            <span className="text-sm font-medium truncate">Logout</span>
-          )}
-        </button>
-      </div>
+ 
     </aside>
   )
 }
