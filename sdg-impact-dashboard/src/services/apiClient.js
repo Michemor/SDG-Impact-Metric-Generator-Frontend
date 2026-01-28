@@ -1,15 +1,37 @@
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
 
-let accessToken = localStorage.getItem('access_token')
-let refreshToken = localStorage.getItem('refresh_token')
+
+// Token state (sync with localStorage)
+
+export const setTokens = (access) => {
+  if (access) localStorage.setItem('access_token', access);
+};
+
+export const clearTokens = () => {
+  localStorage.removeItem('access_token');
+};
 
 // Authentication logic removed
 // export const setTokens = (access, refresh) => {}
 
 // export const clearTokens = () => {}
 
-// export const login = async (username, password) => {}
+export const login = async (username, password) => {
+  const response = await fetch(`${API_BASE_URL}/token/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  });
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}));
+    const message = errorBody?.detail || 'Login failed.';
+    throw new Error(message);
+  }
+  const { access } = await response.json();
+  setTokens(access);
+  return { access };
+};
 
 // export const logout = () => {}
 
